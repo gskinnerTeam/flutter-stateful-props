@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  provider:
   stateful_props:
     path: ../
 

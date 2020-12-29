@@ -1,6 +1,6 @@
 name: stateful_props
 
-version: 0.0.1+3
+version: 0.0.1+8
 description: Encapsulate behavior easily across Widgets. Increase readability by reducing nesting and code locality.
 author: shawn@gskinner.com
 homepage: https://github.com/gskinnerTeam/flutter-stateful-props
