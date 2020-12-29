@@ -74,16 +74,16 @@ From a high level, it works like this:
   }
 }
 ```
-Hopefully that doesn't look to crazy! We just change `initState` => `initProps` and `build` => `buildWithProps` but everything else is the same as a regular old `State`.
+We change `initState` => `initProps` and `build` => `buildWithProps` but other than that, it's the same as a regular old `State`. Except that you almost never need to call `setState` again!
 
-This package suports both Stateful and "Stateless" implementations, `StatefulPropsMixin` and `PropsWidget` respectively. The `PropsWidget` is nice for very small components, but we'll start with the `StatefulPropsMixin` first as it will be the most familiar and has the least amount of boilerplate.
+This package suports both Stateful and "Stateless" implementations, `StatefulPropsMixin` and `PropsWidget` respectively. The `PropsWidget` is nice for very small components, but we'll start with the `StatefulPropsMixin` first as it will be the most familiar and has the least amount of complexity.
 
 ## 🕹️  - StatefulPropsMixin
 
 There are a few steps to start with:
 * Add the `StatefulPropsMixin` to your state
-* override `initProps` instead of `initState` and initialize your props
-* override `buildWithProps` instead of `build()` and use your props
+* override `initProps` and initialize your props
+* override `buildWithProps` and build the tree
 
 Here's a basic CounterApp implementation:
 ```
@@ -112,13 +112,13 @@ class _MyViewState extends State<MyView> with StatefulPropsMixin {
     @override 
     void initProps(){
         _anim = addProp(AnimationControllerProp(0.5));
-        Future.delayed(Duration(seconds: 1), ()=>_anim.controller.forward());
+        addProp(TimerProp(.2, (_) => _anim.controller.forward()));
     } 
     @override 
     Widget buildWithProps(BuildContext context) => Opacity(opacity: _anim.value, child: ...);
 }
 ```
-Notice how we don't have to dispose the `AnimationController` here, it is handled automatically by the Prop. You will never again see an error about a improperly disposed `FocusNode`, `AnimationController` or `TextEditingController`! This goes the same for your own Controllers as well, which you can wrap in a Prop, to make sure no one on the teams forgets those `dispose()` calls!
+Notice how we don't have to dispose the `AnimationController` here, it is handled automatically by the Prop. You will never again see an error about a improperly disposed `FocusNode` or `AnimationController` again! Also, the `TimerProp` is used for a "life-cycle safe" delay: **if the widget is un-mounted before this `TimerProp` fires, it will cancel itself automatically**! Classically you would have to store this reference yourself, override `dispose()` and cancel each timer you use, that all goes away with Props.
 
 Now lets take it a bit further and add some interaction. **Lets say we want to make the animation start over when the Widget is tapped**. Normally this would require a `GestureDetector` which would eat up 3 lines and add a level of nesting (for a compeletely non-visual element). 
 
@@ -135,8 +135,7 @@ class _MyViewState extends State<MyView> with StatefulPropsMixin {
     Widget buildWithProps(BuildContext context) => Opacity(opacity: _anim.value, child: ...);
 }
 ```
-Notice how we don't even declare an instance property for the `GestureDetectorProp`. Since it is just providing callbacks, and has no internal state we care about, we don't need to keep a reference at all. We can just call `addProp` once to register it, and `StatefulProps` will take care of wrapping the `GestureDetector` for us.
-
+Notice how we don't even declare an instance property for the `GestureDetectorProp`. Since it is just providing callbacks, and has no internal state we care about, we don't need to keep a reference at all. We can just call `addProp` once to register it, and `StatefulProps` will take care of wrapping the `GestureDetector` for us. 
 
 The final use case to discuss for the Stateful implementation is the `syncProp`. You use this if your Prop has some dependancy on context (using Provider or InheritedWidget) or on the properties of the enclosing Widget. This is a cause of many hard to spot errors in Flutter apps and reduces the effectiveness of hot-reload.
 
@@ -224,7 +223,7 @@ Using `dispose()` is extremely rare with `StatefulProps` since Props typically c
 
 
 
-## 👀 Code Examples
+## 👀  Code Examples
 
 Below are a large number of different code examples, showing what can be done out of the box. 
 
@@ -233,6 +232,7 @@ In all cases assume these code examples are inside of a `State` + `StatefulProps
 * Show a FutureBuilder 
 * KeyboardListener + MouseRegion
 * Gesture + Tap Listener
+* ContextSafe Timer
 * FocusProp
 * TextController
 * MouseRegion
@@ -318,15 +318,13 @@ And then use it:
      myThing = addProp(ThingProp(Thing()));
  }
 ```
-Another example of inheritence in action, is our shortcut handler for Taps. Since these are so common, we created a dedicated mixin just for taps:
+Another example of inheritance in action, is our shortcut handler for Taps. Since these are so common, we created a dedicated mixin just for taps, that extends `GestureProp`:
 ```
 class TapProp extends GestureProp {
   TapProp(VoidCallback onTap) : super(onTap: onTap);
 
   @override
-  ChildBuilder getBuilder(ChildBuilder childBuilder) {
-    return super.getBuilder(childBuilder);
-  }
+  ChildBuilder getBuilder(ChildBuilder childBuilder) => super.getBuilder(childBuilder);
 }
 ```
 For an example of composition, you can look at the `FutureProp` (ADD LINK), which internally uses a ValueProp to track it's future:
@@ -338,7 +336,6 @@ For an example of composition, you can look at the `FutureProp` (ADD LINK), whic
   }
 ```
 Any Prop can add/sync any other Prop, as long as they do it in `init()`.
-
 
 ## 📃 License
 
