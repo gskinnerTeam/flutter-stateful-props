@@ -14,8 +14,8 @@ mixin StatefulPropsMixin<W extends StatefulWidget> on State<W> {
     _propsManager.setContext(context);
     _propsManager.widget = widget;
     _propsManager.setState = setState;
+    _propsManager.mounted = true;
     initProps();
-    _propsManager.initPropsComplete = true;
   }
 
   /// Optional: Safe place to initialize props.
@@ -61,6 +61,7 @@ mixin StatefulPropsMixin<W extends StatefulWidget> on State<W> {
   @override
   @protected
   void dispose() {
+    _propsManager.mounted = false;
     _propsManager.dispose();
     disposeProps();
     super.dispose();

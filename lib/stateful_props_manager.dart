@@ -13,10 +13,10 @@ extension DurationToSecondsExtension on Duration {
 // The core manager that tracks props for both the StatefulPropsMixin and PropsWidget.
 // One of these exists for each Widget, and it is basically just a wrapper around a list of StatefulProps.
 // * Maintains a list of each Prop `List<StatefulProp> _values = [];`
-// * Also maintains a `Map<Ref, StatefulProp> _propsByKey` which is used by the PropWidget to track variables.
+// * Also maintains a `Map<Ref, StatefulProp> _propsByKey` which is used by the PropWidget to track instance variables w/ static Refs as keys
 // * Requires setState, context and widget injected into it (provided by [StatefulPropsMixin] or [PropsWidget])
 // * Injects `context` and `setState` into each Prop
-// * Calls lifecycle methods on each Prop (init, didUpdate, dispose)
+// * Calls lifecycle methods on each Prop (init, didUpdate, dispose, restore)
 class StatefulPropsManager<W extends Widget> {
   static bool logDuplicateRefWarnings = true;
 
@@ -29,14 +29,14 @@ class StatefulPropsManager<W extends Widget> {
   // Widget/State Dependencies
   void Function(VoidCallback) setState;
   W widget;
+  // Prop might needs to know if the view is mounted, this will hold that state.
   bool mounted = false;
-  bool initPropsComplete = false;
 
   BuildContext _context;
   void setContext(BuildContext value) => _context = value;
   BuildContext getContext() => _context;
 
-  // Calls addProp() and also injects the create method into the prop, so it can be called later.
+  // Calls addProp() and also injects the `create` method into the prop, so it can be called later.
   T syncProp<T>(StatefulProp<dynamic> Function(BuildContext c, W w) create, [String restoreId]) {
     // Use the builder to create the first instance of the property.
     StatefulProp<dynamic> prop = addProp(create(getContext(), widget));
@@ -45,7 +45,7 @@ class StatefulPropsManager<W extends Widget> {
     return prop as T;
   }
 
-  // Add a new statefulProperty that we will keep track of.  This should only ever be called from StatefulWidget.initState()
+  // Add a new Prop that will be synced with lifecycle. This should only be called from `initProps` or `initState`.
   T addProp<T>(StatefulProp<dynamic> prop, [String restoreId]) {
     assert(getContext() != null, '''
       Looks like you're trying to addProp/syncProp before the StatefulPropManger has been initialized. Make sure you've called initState.super() before calling add/syncProp. Or just override initProp() instead.''');
@@ -94,14 +94,18 @@ class StatefulPropsManager<W extends Widget> {
     return null;
   }
 
-  // Wrap local build() call in additional "parent" build calls. Fire them all at the end.
+  // Wrap local build() call in additional "parent" build calls. Fire them all at the end from top to bottom.
   // This ensures the local build() call goes last and gets the latest state from the builders above it.
   Widget buildProps(ChildBuilder childBuild) {
     _values.forEach((prop) => childBuild = prop.getBuilder(childBuild));
     return childBuild(getContext());
   }
 
-  // Use the current widget, to create a new Prop. Pass that new Prop to each existing one so they can update themselves.
+  // Manager will run through each prop, giving it a chance to diff the new state and update itself if needed
+  // For each prop:
+  //    * Use the current context and widget, to create a newProp.
+  //    * Pass that newProp to each existingProp so they can update themselves.
+  // The existingProps are mutable and do not get replaced, they just consume and discard newProp.
   void didUpdateWidget() {
     _values.forEach((property) {
       // Sync any props that have a create method
@@ -112,8 +116,11 @@ class StatefulPropsManager<W extends Widget> {
     });
   }
 
-  // This implements one of the required methods for RestorationMixin. Iterate each property, and give it a chance to restore itself.
+  // This implements one of the required methods for RestorationMixin.
+  // All that's need to implement Restoration, is to add RestorationMixin and supply a restorationId for the State
+  // and another id for each prop: BoolProp(restoreId: "isFlippedOver"))
   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
+    //Iterate each property, and give it a chance to restore itself.
     _values.forEach((prop) {
       if (prop.restoreId != null) {
         // Ignore the protected warning here. Since Props are always a child of some state, they can act as restoration delegates

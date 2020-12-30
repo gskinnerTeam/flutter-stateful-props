@@ -4,8 +4,6 @@ import 'package:flutter/src/scheduler/ticker.dart';
 import '../stateful_props_manager.dart';
 
 // TODO: Add Restoration to StatefulAnimationController
-// TODO: Create some sort of Animation version of this...
-//     maybe, anim1.tween()
 class AnimationProp extends StatefulProp<AnimationProp> implements TickerProvider {
   AnimationProp(this.seconds,
       {

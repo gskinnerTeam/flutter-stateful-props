@@ -7,7 +7,7 @@ import 'comparison_stack.dart';
 /// ///////////////////////////////////////////////////
 /// Basic TextController Example
 /// //////////////////////////////////////////////////
-/// TODO: Add Desc
+/// Uses a TextEditProp to listen for textField changes, and an IntProp to count the number of change events
 
 class BasicTextControllerExample extends PropsWidget {
   @override

@@ -6,7 +6,7 @@ import 'comparison_stack.dart';
 /// ///////////////////////////////////////////////////
 /// Basic Keyboard Example
 /// //////////////////////////////////////////////////
-/// TODO: Add Desc
+/// Adds a keyboard listener and shows the last pressed key in a Text() widget
 
 class BasicKeyboardExample extends PropsWidget {
   @override

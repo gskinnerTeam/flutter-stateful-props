@@ -17,7 +17,7 @@ import 'package:stateful_props/stateful_props.dart';
 ```
 
 ## 📖 Background
-Flutter has a problem: **there is no great way to re-use stateful behavior across Widgets**. Mixins are useful, but share a common scope, making them limited and prone to name clashes. Builders have encapsulated state, but turn your layout tree into a nested mess, reducing readability and obfuscating your layout code. There is a long discussion on the issue [here](https://github.com/flutter/flutter/issues/51752).
+Flutter has a problem: **there is no great way to re-use stateful behavior across Widgets**. Mixins are useful, but share a common scope, making them limited and prone to name clashes. Builders have encapsulated state, but turn your layout tree into a nested mess, reducing readability and obfuscating your layout code. There is a long discussion on the issue [here](https://github.com/flutter/flutter/issues/51752). 
 
 This manifests in some common pain-points:
 * Having to `override dispose` for controllers, timers, streams etc
@@ -46,7 +46,7 @@ With the preamble out of the way, lets look at some code!
 One of the main sources of bugs in Flutter is an `AnimationController`, or `Timer`, that is not disposed properly. 
 
 With `StatefulProps` this is no longer something you have to think about:
-```
+```dart
 class _MyViewState extends State with StatefulPropsMixin {
     TimerProp timer; //This holds a Timer inside
     AnimationProp anim1; //This holds an AnimationController inside
@@ -76,7 +76,7 @@ Already with this simple example, you can begin to see the benefits. A couple po
 Probably the biggest pain-point in Flutter currently is keeping internal controllers synced with the outside state, either from the Widget or the Context (using `Provider` or `InheritedWidget`). 
 
 For example, if you create something like this inside `initState`: 
-```
+```dart
 anim1 = AnimationController(
    duration: widget.duration, 
    vsync: Provider.of<TickerProvider>(context))
@@ -84,7 +84,7 @@ anim1 = AnimationController(
 This Controller will become out of sync if either of these dependencies change in the future. It's up to you to override `didChangeWidget` and implement the diff-check your self: `if(oldWidget.foo != widget.foo) // blah blah blah`. This is confusing for new devs, annoying for experienced devs, and prone to bugs for all.
 
 StatefulProps solves this issue by using a `syncProp()` call when registering your Props:
-```
+```dart
 animProp1 = syncProp((c, w) => AnimationProp(
     w.duration, 
     vsync: Provider.of<TickerProvider>(c))); 
@@ -97,7 +97,7 @@ This is a minor one in comparison to the others, but it does get pretty annoying
 Currently, anytime you want to update the view, you need to wrap your state change in `setState((){}))`, inevitably this begins to hurt readability, and you will either write a `function setFoo(value)` or encapsulate the variable with `get foo` and `set foo` accessors. Either way it costs you a few lines and some wasted typing. No big deal with 1 field, but after 3 or 4, this gets pretty ugly and can begin to overwhelm your more important code. 
 
 `StatefulProps` solves this in a very simple way. There are simple primitive Props, like `IntProp`, `BoolProp`, that act as `ValueNotifier` style objects that **call `setState` when they change**. This is very handy for storing a simple `isLoading` or `currentTab` value. To build the basic `CounterApp` for example, we can just use an `IntProp _counter` and do `_counter.value++`:
-```
+```dart
     IntProp _counter;
     
     @override 
@@ -123,7 +123,7 @@ Builders actually do a great job of _encapsulating_ logic and state, the problem
 Lets say we had a button widget that is clickable (+`GestureDetector`), but also needs to know it's parent's size so it can make some responsive decisions (+`LayoutBuilder`). On top of that, we want to detect when the mouse is over the widget (+`MouseRegion`), and we want to listen to the Keyboard to support the [ENTER] key (+`RawKeyboardListener`). On top of all that, lets say we want to run a Future when something happens (+`FutureBuilder`).
 
 You probably see where we are going with this :D In vanilla Flutter, we're looking at something like this:
-```
+```dart
   Widget build(BuildContext _) {
     print(_isOver.isHovered);
     return MouseRegion(
@@ -151,7 +151,7 @@ You probably see where we are going with this :D In vanilla Flutter, we're looki
 This is ~20 lines of code of pure boilerplate and a mess of indents. Before we've even written a single line of unique code! **As an experiment, try and find the 3 `print()` calls and the `//Build Tree` above.** Not super fun, right? That was way harder than it ought to be.
 
 With `StatefulProps`, this all just goes away:
-```
+```dart
     LayoutProp _layout;
     MouseRegionProp _mouse;
     FutureProp _futureProp;
@@ -194,7 +194,7 @@ This may seem like a lot, but when viewed side by side, you can see it's not so 
 ![](http://screens.gskinner.com/shawn/Photoshop_2020-12-30_01-23-03.png)
 
 Other than those changes most everything else is identical. Both versions use the same Props under the hood, and the Widget overrides are identical:
-```
+```dart
 class MyView extends PropsWidget {
     static final Ref<TimerProp> _timer = Ref(); //This holds a Timer inside
     static final Ref<AnimationProp> _anim1 = Ref(); //This holds an AnimationController inside
@@ -239,7 +239,7 @@ In all cases assume these code examples are inside of a `State with StatefulProp
 
 ## Creating your own Props
 It's very easy to create your own Props. Just extend `StateProperty`, and override any of the optional methods. There are various flavors of Props you can look at for reference:
-* Controller style props like [`AnimProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/animation_prop.dart) and [`FocusProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/focus_prop.dart)
+* Controller style props like [`AnimProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/animation_prop.dart) and [`TextEditProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/text_edit_prop.dart)
 * Pure callback props like [`GestureProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/gesture_prop.dart) and [`KeyboardProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/keyboard_prop.dart)
 * Combinations of callbacks and state, like the [`MouseRegionProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/mouse_region_prop.dart)
 * Builders that change context like [`LayoutProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/layout_prop.dart) and [`FutureProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/future_prop.dart) 
@@ -259,13 +259,13 @@ The available methods that your custom Prop can override are:
 Because `StatefulProps` are classes, and not functions, they benefit from all of the code re-use strategies available in Dart. Inheritence, composition, inrerfaces and mixins are all available as options when putting together your own `StatefulProps`. 
 
 While there's many advanced things you can do with this extensibility, even the primitive examples are quite interesting. For example, if you look at the existing `IntProp` class:
-```
+```dart
 class IntProp extends ValueProp<int> {
   IntProp([int defaultValue = 0]) : super(defaultValue);
 }
 ```
 You can see that it simply extends a more basic `ValueProp<T>`:
-```
+```dart
 class ValueProp<T> extends StatefulProp<ValueProp<T>> {
   ValueProp(this._value, {this.onChange});
   T _value;
@@ -284,7 +284,7 @@ class ValueProp<T> extends StatefulProp<ValueProp<T>> {
 This is the entire code for both these Props! They have no lifecycle hooks at all, except that they call `setState()` when their value changes.
 
 All of the various primitives in the library are implemented on this generic `ValueProp` and the same Prop could be used as a " ValueNotifier" style object for your own types:
- ```
+ ```dart
  ValueProp<MyThing> myThing;
  initProps(){
      myThing = addProp(ValueProp(MyThing()));
@@ -295,20 +295,20 @@ All of the various primitives in the library are implemented on this generic `Va
  myThing.value = MyThing(); // This will rebuild
  ```
  If (when) you get sick of writing out the generic, you can just define your own `ThingProp` by extending `ValueProp` yourself:
- ```
+ ```dart
  class ThingProp extends ValueProp<ThingProp> {
   ThingProp([ThingProp defaultValue = null]) : super(defaultValue);
 }
 ```
 And then use it:
-```
+```dart
  ThingProp myThing;
  initProps(){
      myThing = addProp(ThingProp(Thing()));
  }
 ```
 Another example of inheritance is our shortcut handler for Taps. Since taps are by far the most common gesture, we created a dedicated `TapProp(VoidCallback)` to reduce boilerplate as low as possible. It extends `GestureProp` and just passes it a `onTap: ` value:
-```
+```dart
 class TapProp extends GestureProp {
   TapProp(VoidCallback onTap) : super(onTap: onTap);
 }
@@ -316,7 +316,7 @@ class TapProp extends GestureProp {
 We could just as easily have used composition here, but inheritence is more succinct in this case.
 
 For an example of composition, you can look at the [`FutureProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/future_prop.dart), which internally uses a `ValueProp` to track it's future:
-```
+```dart
   @override
   void init() {
     // Use a ValueProp to handle our 'did-change' check

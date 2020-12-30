@@ -16,22 +16,6 @@ import 'sync_props_example.dart';
 
 export 'comparison_stack.dart';
 
-/**
- * TODO:
- * TabController
- * StreamBuilder
-
- * // LayoutBuilder
-    // FutureBuilder
-    // LayoutProp
- * // KeyboardListener!!
- * // ScrollController
- * // PageController
- * // TextEditingController
- * // FocusNode
- * // AnimationController
- */
-
 void main() {
   runApp(MaterialApp(home: Scaffold(body: StatefulPropsDemo())));
 }

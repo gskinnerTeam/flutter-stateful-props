@@ -5,10 +5,6 @@ import '../props/primitive_props.dart';
 
 import '../stateful_props_manager.dart';
 
-//TODO:
-// * Add some sort of caching, make .future cached by default and replace(future)
-// * Respect initialData
-// * Add maintainState bool
 class FutureProp<T> extends StatefulProp<FutureProp<T>> {
   FutureProp(
     this.initialFuture, {

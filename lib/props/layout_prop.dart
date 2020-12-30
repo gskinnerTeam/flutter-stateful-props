@@ -25,7 +25,7 @@ class LayoutProp extends StatefulProp<LayoutProp> {
   @override
   void init() {
     // In order to get a proper measurement for size we need to layout twice...
-    //TODO: Can we do something else here?
+    //TODO: Can we avoid this extra rebuild somehow? This seems rather inefficient.
     if (measureContext) {
       scheduleMicrotask(() => setState(() {}));
     }
