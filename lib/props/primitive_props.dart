@@ -22,6 +22,12 @@ class DoubleProp extends ValueProp<double> {
   int get toInt => value.toInt();
 }
 
+class StringProp extends ValueProp<String> {
+  StringProp([String defaultValue]) : super(defaultValue);
+
+  bool get isEmpty => _value == null || _value.isEmpty;
+}
+
 class ValueProp<T> extends StatefulProp<ValueProp<T>> {
   ValueProp(this._value, {this.onChange});
   T _value;
