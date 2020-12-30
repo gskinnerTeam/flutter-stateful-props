@@ -7,21 +7,21 @@ import '../stateful_props_manager.dart';
 
 class FutureProp<T> extends StatefulProp<FutureProp<T>> {
   FutureProp(
-    this.initialFuture, {
+    this.initialValue, {
     this.initialData,
     this.key,
   }) {}
-  Future<T> initialFuture;
+  Future<T> initialValue;
   T initialData;
   Key key;
 
   // Helper methods
   AsyncSnapshot<T> get snapshot => _snapshot;
-  T get value => _snapshot?.data ?? null;
+  T get data => _snapshot?.data ?? null;
   bool get isWaiting => _snapshot?.connectionState == ConnectionState.waiting;
 
-  Future<T> get future => futureValue?.value;
-  set future(Future<T> value) {
+  Future<T> get value => futureValue?.value;
+  set value(Future<T> value) {
     if (isWaiting) return;
     futureValue.value = value;
   }
@@ -35,7 +35,7 @@ class FutureProp<T> extends StatefulProp<FutureProp<T>> {
   @override
   void init() {
     // Use a ValueProp to handle our 'did-change' check
-    futureValue = addProp?.call(ValueProp(initialFuture));
+    futureValue = addProp?.call(ValueProp(initialValue));
   }
 
   @override

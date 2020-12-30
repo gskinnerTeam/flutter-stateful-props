@@ -90,7 +90,7 @@ class _BasicBuilderStatefulState extends State<BasicBuilderStateful> with Statef
     layout = addProp(LayoutProp(measureContext: true));
     someFuture = addProp(FutureProp(_loadData()));
     addProp(TapProp(() {
-      someFuture.future = _loadData();
+      someFuture.value = _loadData();
     }));
   }
 
@@ -120,7 +120,7 @@ class BasicBuilderStateless extends PropsWidget {
     addProp(_layout, LayoutProp(measureContext: true));
     addProp(_someFuture, FutureProp(_loadData()));
     addProp(_tap, TapProp(() {
-      someFuture.future = _loadData();
+      someFuture.value = _loadData();
     }));
     print("$this ${context.watch<int>()}");
   }

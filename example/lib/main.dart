@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:stateful_props/props/future_prop.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 import 'stateful_prop_demo.dart';
 import 'dart:math';
@@ -72,5 +74,37 @@ class _StatefulPropsDemoState extends State<StatefulPropsDemo> with SingleTicker
         )
       ]),
     );
+  }
+}
+
+// "Hello World" Examples
+
+class HelloWorld extends StatefulWidget {
+  @override
+  _HelloFutureState createState() => _HelloFutureState();
+  //_HelloStreamState createState() => _HelloStreamState();
+}
+
+class _HelloFutureState extends State<HelloWorld> with StatefulPropsMixin {
+  FutureProp<String> future;
+
+  @override
+  void initProps() {
+    future = addProp(FutureProp(null));
+    _loadData();
+  }
+
+  Future<String> _loadData() => future.value = Future.delayed(Duration(seconds: 1), () => "result");
+
+  @override
+  Widget buildWithProps(BuildContext context) {
+    return Text("${future.snapshot.hasData}");
+  }
+}
+
+class _HelloStreamState extends State<HelloWorld> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
