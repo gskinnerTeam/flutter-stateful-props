@@ -28,6 +28,8 @@ This manifests in some common pain-points:
 
 `StatefulProps` offers a solution to this: "Props". Small, encapsulated state objects, tied to the lifecycle of the Widget. Each Widget has a list of these "mini states". Props can `init` and `dispose` themselves, they can add Widgets to the tree, and they can sync themselves when dependencies change.
 
+If you'd like to jump right into the code, check out the [Basic Animation Example](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/example/lib/basic_animator.dart ) where we show both Classic and StatefulProps implementations.
+
 ## 💡 Inspiration
 `StatefulProps` is heavily inspired by [hooks](https://youtu.be/dpw9EHDh2bM?t=1092) (and prior art like [DisplayScript](http://displayscript.org/introduction.html)), but it takes a less functional approach, leaning into classic OOP techniques. You can still do everything you could do with `hooks`(functional composition) but other patterns like inheritence, mixins, interfaces and abstract classes are all on the table as well. 
 
