@@ -35,6 +35,7 @@ class BasicBuilderClassic extends StatefulWidget {
 
 class _BasicBuilderClassicState extends State<BasicBuilderClassic> {
   Future<int> _someFuture;
+  bool _isOver;
   @override
   void initState() {
     _someFuture = _loadData();
@@ -46,22 +47,26 @@ class _BasicBuilderClassicState extends State<BasicBuilderClassic> {
 
   @override
   Widget build(BuildContext _) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() => _someFuture = _loadData()),
-      child: LayoutBuilder(builder: (lc, constraints) {
-        return FutureBuilder<int>(
-            future: _someFuture,
-            builder: (fc, snapshot) {
-              Size contextSize = Size(1, 1);
-              RenderBox rb = fc.findRenderObject() as RenderBox;
-              if (rb?.hasSize ?? false) {
-                contextSize = rb.size;
-              }
-              print("$this ${fc.watch<int>()}");
-              return _Content(snapshot, constraints, contextSize);
-            });
-      }),
+    return MouseRegion(
+      onExit: (_) => setState(() => _isOver = false),
+      onEnter: (_) => setState(() => _isOver = true),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _someFuture = _loadData()),
+        child: LayoutBuilder(builder: (lc, constraints) {
+          return FutureBuilder<int>(
+              future: _someFuture,
+              builder: (fc, snapshot) {
+                Size contextSize = Size(1, 1);
+                RenderBox rb = fc.findRenderObject() as RenderBox;
+                if (rb?.hasSize ?? false) {
+                  contextSize = rb.size;
+                }
+                print("$this ${fc.watch<int>()}");
+                return _Content(snapshot, constraints, contextSize);
+              });
+        }),
+      ),
     );
   }
 }
