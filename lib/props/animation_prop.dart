@@ -32,14 +32,14 @@ class AnimationProp extends StatefulProp<AnimationProp> implements TickerProvide
   bool get isGoingReverse => controller.status == AnimationStatus.reverse;
 
   // Utilities to make tween usage cleaner  final t = anim1Prop.addDoubleTween(curve: Curves.easeOut)
-  Animation<T> tween<T>(Tween<T> tween, {Curve curve: Curves.linear}) =>
+  Animation<T> addTween<T>(Tween<T> tween, {Curve curve: Curves.linear}) =>
       tween.animate(CurvedAnimation(parent: _controller, curve: curve));
 
   Animation<double> tweenDouble({double begin: 0.0, double end: 1.0, Curve curve: Curves.linear}) =>
-      tween(Tween<double>(begin: begin, end: end), curve: curve);
+      addTween(Tween<double>(begin: begin, end: end), curve: curve);
 
   Animation<int> tweenInt({int begin: 0, int end: 100, Curve curve: Curves.linear}) =>
-      tween(IntTween(begin: begin, end: end), curve: curve);
+      addTween(IntTween(begin: begin, end: end), curve: curve);
 
   // Internal State
   Ticker _ticker;
