@@ -5,7 +5,7 @@ NOTE: This plugin is pre-release, and there are some missing API's and probably 
 ## 🔨 Installation
 ```yaml
 dependencies:
-  stateful_props: ^0.0.1
+  stateful_props: ^0.1.1
 ```
 
 ### ⚙ Import
