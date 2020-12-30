@@ -52,7 +52,9 @@ class _BasicBuilderClassicState extends State<BasicBuilderClassic> {
       onEnter: (_) => setState(() => _isOver = true),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _someFuture = _loadData()),
+        onTap: () => setState(() {
+          _someFuture = _loadData();
+        }),
         child: LayoutBuilder(builder: (lc, constraints) {
           return FutureBuilder<int>(
               future: _someFuture,
@@ -87,7 +89,9 @@ class _BasicBuilderStatefulState extends State<BasicBuilderStateful> with Statef
   void initProps() {
     layout = addProp(LayoutProp(measureContext: true));
     someFuture = addProp(FutureProp(_loadData()));
-    addProp(TapProp(() => someFuture.future = _loadData()));
+    addProp(TapProp(() {
+      someFuture.future = _loadData();
+    }));
   }
 
   // Wait 1 second, return random Integer
@@ -115,7 +119,9 @@ class BasicBuilderStateless extends PropsWidget {
   void initProps() {
     addProp(_layout, LayoutProp(measureContext: true));
     addProp(_someFuture, FutureProp(_loadData()));
-    addProp(_tap, TapProp(() => someFuture.future = _loadData()));
+    addProp(_tap, TapProp(() {
+      someFuture.future = _loadData();
+    }));
     print("$this ${context.watch<int>()}");
   }
 
