@@ -7,7 +7,7 @@ _We're asking everyone to please try it out, and [log any issues that you find](
 ### 🔨 Installation
 ```yaml
 dependencies:
-  stateful_props: ^0.1.1
+  stateful_props: ^0.1.2
 ```
 
 ### ⚙ Import
@@ -23,8 +23,7 @@ This manifests in some common pain-points:
 * Having to `override dispose` for controllers, timers, streams etc
 * Having to `override didUpdateDependencies/didChangeWidget` to sync state with dependencies
 * Having to calling `setState((){})` each time you want to change some state and rebuild (which almost always go together)
-* Having to use Builders to get non-visual functionality like gestures, keyboard/mouse events and layout constraints
-* Having to write verbose custom Widgets or Builders just to encapsulate some state or behavior
+* Having to use Widgets or Builders to encapsulate some non-visual state or behavior, hurting readability
 
 `StatefulProps` offers a solution to this: "Props". Small, encapsulated state objects, tied to the lifecycle of the Widget. Each Widget has a list of these "mini states". Props can `init` and `dispose` themselves, they can add Widgets to the tree, and they can sync themselves when dependencies change.
 
@@ -68,9 +67,8 @@ class _MyViewState extends State with StatefulPropsMixin {
 There are several things to note here:
 * The `Timer` and the `AnimationController` are both cleaned up automatically. We can just "set it and forget it", knowing they are safe.
 * We didn't need to use `TickerProviderMixin`, the StatefulProp has it's own `Ticker`, showing how Props can fully encapsulate their function.
-* The Animation automatically calls `setState` when it's playing, no need to `addListener(()=>setState((){}))`, use a `Transition` widget or an `AnimatedBuilder`. 
-* `AnimationProp` has syntax sugar like `autoStart`, `autoBuild` and a `double seconds` value insted of `Duration duration` (we provide built-in extensions for `duration.double` and `double.duration` for quick conversion). 
-* Not seen here, `AnimationProp` also has other cool helpers like `tweenDouble({double begin, double end, Curve curve})` which makes it super easy to add tweens onto a controller.
+* The Animation automatically calls `setState` when it's playing, no need to do`addListener(()=>setState((){}))`, or use a `Transition`/`AnimatedBuilder` widget. 
+* `AnimationProp` has syntax sugar like `autoStart`, `autoBuild` and `tweenDouble()` showing how common behaviors can be encapsulated.
 
 Already with this simple example, you can begin to see the benefits. A couple potential bugs have been eliminated, the Widget itself is more readable and maintainable when `dispose` does not exist, and we do not need to introduce builders into our tree.
 
