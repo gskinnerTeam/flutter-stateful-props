@@ -14,7 +14,7 @@ class HelloStateless extends PropsWidget<HelloStateless> {
   @override
   void initProps() {
     syncProp(_tap, (c, w) => TapProp(() => print(w.someValue)));
-    addProp(_isLoading, BoolProp(false));
+    addProp(_isLoading, BoolProp());
   }
 
   @override

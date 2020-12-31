@@ -71,7 +71,7 @@ class BasicKeyboardStateless extends PropsWidget {
   void initProps() {
     final focus = addProp(_focus, FocusProp(canRequestFocus: false));
     addProp(_keyboard, KeyboardProp(onPressed: _handleKeyDown, focusNode: focus.node));
-    addProp(_lastKeyPressed, ValueProp<RawKeyEvent>(null));
+    addProp(_lastKeyPressed, ValueProp<RawKeyEvent>());
   }
 
   void _handleKeyDown(RawKeyEvent event) => setState(() => use(_lastKeyPressed).value = event);

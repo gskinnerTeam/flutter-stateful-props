@@ -6,12 +6,12 @@ import '../props/primitive_props.dart';
 import '../stateful_props_manager.dart';
 
 class FutureProp<T> extends StatefulProp<FutureProp<T>> {
-  FutureProp(
-    this.initialValue, {
+  FutureProp({
+    this.initial,
     this.initialData,
     this.key,
   }) {}
-  Future<T> initialValue;
+  Future<T> initial;
   T initialData;
   Key key;
 
@@ -35,7 +35,7 @@ class FutureProp<T> extends StatefulProp<FutureProp<T>> {
   @override
   void init() {
     // Use a ValueProp to handle our 'did-change' check
-    futureValue = addProp?.call(ValueProp(initialValue));
+    futureValue = addProp?.call(ValueProp(initial: initial));
   }
 
   @override

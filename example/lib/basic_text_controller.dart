@@ -70,7 +70,7 @@ class BasicTextControllerStateless extends PropsWidget {
   @override
   void initProps() {
     addProp(_text1, TextEditProp(text: "Hello!", onChanged: _handleTextChanged));
-    addProp(_changeCount, IntProp(0));
+    addProp(_changeCount, IntProp());
   }
 
   void _handleTextChanged(prop) => use(_changeCount).value++;

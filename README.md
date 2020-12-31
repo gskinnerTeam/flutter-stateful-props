@@ -7,7 +7,7 @@ _We're asking everyone to please try it out, and [log any issues that you find](
 ### 🔨 Installation
 ```yaml
 dependencies:
-  stateful_props: ^0.1.2
+  stateful_props: ^0.1.3
 ```
 
 ### ⚙ Import
@@ -193,7 +193,40 @@ Notice how much easier everything is to parse here, finding the unique/custom co
 
 Another interesting thing to note is that we do not keep a reference to the `TapProp` or the `KeyboardProp`. Since we are only interested in the callbacks we just call `addProp()` and forget about them. `StatefulProps` will handle everything whether you keep a reference or not. We _will_ keep a handle to `layout`, `futureProp` and `mouse` because we want to use those later in our `buildWithProps()` method.
 
-### A word about dispose()
+### Optimizing rebuilds
+Use the included `NotifiersBuilder` to rebuild portions of the tree. It simply takes a list of `ChangeNotifiers` and rebuilds when any of them change. All of the primitives are `ChangeNotifiers` and can turn off their default "autoBuild" behavior. 
+```dart
+  IntProp _counter;
+  BoolProp _toggle;
+
+  @override
+  void initProps() {
+    _counter = addProp(IntProp(autoBuild: false));
+    _toggle = addProp(BoolProp(autoBuild: false));
+  }
+
+  @override
+  Widget buildWithProps(BuildContext context) {
+    return RandomColoredBox(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          OutlineButton(onPressed: rebuild, child: Text("setState")),
+          OutlineButton(onPressed: () => _toggle.toggle(), child: Text("bool.toggle()")),
+          OutlineButton(onPressed: () => _counter.increment(), child: Text("int.increment()")),
+          NotifiersBuilder(
+            [_counter, _toggle],
+            builder: (_, __) {
+              String content = "counter: ${_counter.value}, isToggled: ${_toggle.value}";
+              return RandomColoredBox(child: Text(content));
+            },
+          )
+        ],
+      ),);
+  }
+```
+
+## A word about dispose()
 It is quite rare to need `dispose()` within your main `State<T>` as Props (by design) clean up their own state. However, if needed you can override the standard `dispose()` method, and do your thing! 
 
 ## 👀  PropsWidget
@@ -243,23 +276,86 @@ This also shows the point where the boilerplate of the PropsWidget is getting a 
 
 You can decide which you like best and where. In our experience the `PropsWidget` works great up to 2 or 3 Props, and after that a `StatefulPropsMixin` becomes a little nicer to work with as the `Ref` and `use` boilerplate adds up.
 
-## 👀  More Code Examples!
-Below are a large number of different code examples, showing some different use cases that can be done with the core Props.
+## 👀  MOAR CODE!
+Below are some samples showing some different use cases that can be done with the core Props.
 
 In all cases assume these code examples are inside of a `State with StatefulPropsMixin`. Everything here can be done in a `PropsWidget` as well, but we'll show the mixin versions as the code reads a little cleaner.
 
-(TODO: Add More Examples)
-* FutureBuilder 
-* StreamBuilder 
-* Gesture + Tap Listener
-* ContextSafe Timer
-* FocusProp
-* TextController
-* MouseRegion 
-* LayoutBuilder
-* Primitives
-* GestureProp
-* MultipleAnimations
+### Simple Timer
+A Timer call that is automatically disposed, making it context-safe.
+```dart
+  TimerProp timer;
+  IntProp intProp;
+  @override
+  void initProps() {
+    intProp = addProp(IntProp());
+    timer = addProp(TimerProp(.5, (_) => intProp.value++, periodic: true));
+  }
+
+  @override
+  Widget buildWithProps(BuildContext context) 
+      => Text("Ticks: ${intProp.value}");
+```
+
+### Simple TextEditingController
+TextEditingController that is automatically disposed.
+```dart
+  TextEditProp textEdit1;
+
+  @override
+  void initProps() {
+    textEdit1 = addProp(TextEditProp(onChanged: (prop) => print(prop.text)));
+  }
+
+  @override
+  Widget buildWithProps(BuildContext context) 
+      => TextField(controller: textEdit1.controller);
+```
+
+### FutureProp and TapProp
+Loads a future initally, and reloads it on tap.
+```dart
+  FutureProp<String> future;
+
+  @override
+  void initProps() {
+    // Load a future when the widget is first mounted
+    future = addProp(FutureProp(initial: _loadData()));
+    // Refresh when the widget is tapped
+    addProp(TapProp(() => future.value = _loadData()));
+  }
+
+  Future<String> _loadData() => Future.delayed(Duration(seconds: 1), () => "result");
+
+  @override
+  Widget buildWithProps(BuildContext context) 
+      => Text("${future.snapshot.hasData}");
+```
+
+### FocusProp and IntProp
+Counts the number of FocusEvents, and rebuilds the view when that count changes.
+```dart
+  FocusProp focus1;
+  IntProp focusCount;
+
+  @override
+  void initProps() {
+    focus1 = addProp(FocusProp(
+      onChanged: (_) => focusCount.increment()));
+    focusCount = addProp(IntProp());
+  }
+
+  @override
+  Widget buildWithProps(BuildContext context) {
+    return Column(
+      children: [
+        TextField(focusNode: focus1.node), 
+        TextField(), 
+        Text("FocusEvent Count: $focusCount")
+      ],
+    );
+  }
+```
 
 ## Creating your own Props
 It's very easy to create your own Props. Just extend `StateProperty`, and override any of the optional methods. There are various flavors of Props you can look at for reference:

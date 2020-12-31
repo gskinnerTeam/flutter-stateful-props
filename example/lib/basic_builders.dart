@@ -88,7 +88,7 @@ class _BasicBuilderStatefulState extends State<BasicBuilderStateful> with Statef
   @override
   void initProps() {
     layout = addProp(LayoutProp(measureContext: true));
-    someFuture = addProp(FutureProp(_loadData()));
+    someFuture = addProp(FutureProp(initial: _loadData()));
     addProp(TapProp(() {
       someFuture.value = _loadData();
     }));
@@ -118,7 +118,7 @@ class BasicBuilderStateless extends PropsWidget {
   @override
   void initProps() {
     addProp(_layout, LayoutProp(measureContext: true));
-    addProp(_someFuture, FutureProp(_loadData()));
+    addProp(_someFuture, FutureProp(initial: _loadData()));
     addProp(_tap, TapProp(() {
       someFuture.value = _loadData();
     }));

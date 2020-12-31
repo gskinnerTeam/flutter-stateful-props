@@ -55,6 +55,7 @@ class StatefulPropsManager<W extends Widget> {
     prop.setState = this.setState;
     prop.addProp = addProp;
     prop.syncProp = syncProp;
+    prop.isMounted = mounted;
     _values.add(prop);
     prop.init();
     return prop as T;
@@ -130,7 +131,12 @@ class StatefulPropsManager<W extends Widget> {
     });
   }
 
-  void dispose() => _values.forEach((p) => p.dispose());
+  void dispose() {
+    _values.forEach((p) {
+      p.dispose();
+      p.isMounted = false;
+    });
+  }
 }
 
 // Extend this base class to create your own StatefulProperty. Every method is optional, implement only what you need.
@@ -183,6 +189,9 @@ abstract class StatefulProp<T> {
   // Injected by the the manager when a prop is added
   @protected
   BuildContext context;
+
+  @protected
+  bool isMounted;
 
   // The Add/Sync methods are injected from the manager so props can register sub-props allowing composition
   T Function<T>(StatefulProp<dynamic> prop, [String restoreId]) addProp;

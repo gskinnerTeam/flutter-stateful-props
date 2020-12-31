@@ -122,7 +122,7 @@ class BasicSyncStateless extends PropsWidget<BasicSyncStateless> {
     });
     // Use syntactic sugar to easily add a tween curves and settings
     Animation<int> intTween = tapAnim.tweenInt(curve: Curves.easeOut, begin: 1, end: 10);
-    addProp(_countTween, ValueProp(intTween));
+    addProp(_countTween, ValueProp(initial: intTween));
     // Listen for mouseInfo
     addProp(_mouseProp, MouseRegionProp());
     // Listen for tap

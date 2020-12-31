@@ -16,3 +16,5 @@ export 'props/primitive_props.dart';
 export 'props/scroll_prop.dart';
 export 'props/text_edit_prop.dart';
 export 'props/timer_prop.dart';
+
+export 'notifiers_builder.dart';

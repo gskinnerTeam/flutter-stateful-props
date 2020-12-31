@@ -47,7 +47,8 @@ mixin StatefulPropsMixin<W extends StatefulWidget> on State<W> {
   @protected
   Widget build(BuildContext _) {
     // Each Prop can wrap the Widget's tree with 1 or more Widgets, they are called in top-down order.
-    return _propsManager.buildProps((c) => buildWithProps(c));
+    Widget children = _propsManager.buildProps((c) => buildWithProps(c));
+    return children;
   }
 
   @override

@@ -41,8 +41,8 @@ class _BasicFocusStatefulState extends State<BasicFocusStateful> with StatefulPr
   IntProp _focusOutCount;
   @override
   void initProps() {
-    _focusInCount = addProp(IntProp(0));
-    _focusOutCount = addProp(IntProp(0));
+    _focusInCount = addProp(IntProp());
+    _focusOutCount = addProp(IntProp());
     node1 = addProp(FocusProp(onChanged: _handleFocus));
     node2 = addProp(FocusProp(onChanged: _handleFocus));
   }
@@ -76,8 +76,8 @@ class BasicFocusStateless extends PropsWidget {
 
   @override
   void initProps() {
-    addProp(_focusInCount, IntProp(0));
-    addProp(_focusOutCount, IntProp(0));
+    addProp(_focusInCount, IntProp());
+    addProp(_focusOutCount, IntProp());
     addProp(node1, FocusProp(onChanged: _handleFocus));
     addProp(node2, FocusProp(onChanged: _handleFocus));
   }
