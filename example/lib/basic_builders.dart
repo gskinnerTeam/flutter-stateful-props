@@ -17,6 +17,9 @@ class BasicBuilderExample extends PropsWidget {
     return Provider<int>.value(
       value: 0,
       child: ComparisonStack(
+        texts: [
+          "Show a Future and Layout Builder in use",
+        ],
         classic: BasicBuilderClassic(),
         stateful: BasicBuilderStateful(),
         stateless: BasicBuilderStateless(),

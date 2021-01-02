@@ -13,6 +13,11 @@ class OptimizedRebuildsExample extends PropsWidget {
   @override
   Widget buildWithProps(BuildContext context) {
     return ComparisonStack(
+      texts: [
+        "Shows how you can optimize builds using a `NotifiersListener`.",
+        "1. Clicking Toggle or Increment will rebuild only the inner portion, while setState will build everything.",
+        "2. The 100px tall box doesn't rebuild, even though it's inside the builder, as it's passed in as a cachedChild"
+      ],
       //stateless: OptimizedRebuildsStateless(),
       stateful: OptimizedRebuildsStateful(),
       //classic: OptimizedRebuildsClassic(),
@@ -59,7 +64,8 @@ class _OptimizedRebuildsStatefulState extends State<OptimizedRebuildsStateful> w
           NotifiersBuilder(
             [_counter, _toggle],
             // Provide a cached child
-            child: RandomColoredBox(child: SizedBox(width: 100, height: 100)),
+            child: RandomColoredBox(
+                child: SizedBox(width: 100, height: 100, child: Center(child: Text("This is cached")))),
             builder: (_, cachedChild) {
               String content = "counter: ${_counter.value}, isToggled: ${_toggle.value}";
               return Column(children: [

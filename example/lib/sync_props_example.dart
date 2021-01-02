@@ -12,11 +12,23 @@ import 'comparison_stack.dart';
 // * Uses syncProp() so controller stays in sync with dependencies
 // * Use `tweenInt` helper method to fade with a stepped fashion (10%, 20%, etc... )
 // * Using `MouseRegionProp` to track mouseInfo like .isHovered, .localPosition etc
-class SyncExample extends StatelessWidget {
+class SyncExample extends PropsWidget {
+  // Use an IntProp to control the Rebuilds in the Comparison Stack
+  static Ref<IntProp> rebuildCounter = Ref();
   @override
-  Widget build(BuildContext context) {
+  void initProps() => addProp(rebuildCounter, IntProp());
+
+  @override
+  Widget buildWithProps(BuildContext context) {
     Deps deps = Provider.of(context);
     return ComparisonStack(
+      key: ValueKey(use(rebuildCounter).value),
+      onPressed: () => use(rebuildCounter).value++,
+      texts: [
+        "Tests Provider dependencies,  ProvidedValues.vsync and  ProvidedValues.duration are both used.",
+        "1. Uses `tweenInt` helper method to fade with a stepped fashion (10%, 20%, etc... )",
+        "2. Using `MouseRegionProp` to track mouseInfo like .isHovered, .localPosition etc"
+      ],
       stateless: BasicSyncStateless(deps.vsync),
       // Suppler ourselves as tickerProvider (TODO: This is not a good demo.. how else can we do this?? )
       stateful: BasicSyncStateful(deps.vsync),
@@ -51,7 +63,7 @@ class _BasicSyncStatefulState extends State<BasicSyncStateful> with StatefulProp
     // Create Animation that is sync'd to some dependencies
     AnimationProp tapAnim = syncProp((c, w) {
       return AnimationProp(
-        c.watch<Deps>().duration, // get duration from Provider
+        c.watch<Deps>().seconds, // get duration from Provider
         vsync: w.vsync, // Get vsync from the current widget,
         autoStart: false,
       );
@@ -78,7 +90,7 @@ class _BasicSyncStatefulState extends State<BasicSyncStateful> with StatefulProp
     return Container(
       decoration: BoxDecoration(color: fillColor, border: Border.all(color: borderColor, width: 10)),
       alignment: Alignment.center,
-      child: Text("ticker: ${widget.vsync}, $label, duration: ${deps.duration}",
+      child: Text("ticker: ${widget.vsync}, $label, duration: ${deps.seconds}",
           style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 22)),
     );
   }
@@ -105,7 +117,7 @@ class BasicSyncStateless extends PropsWidget<BasicSyncStateless> {
     // Create Animation that is sync'd to some dependencies
     final tapAnim = syncProp(_anim, (c, w) {
       return AnimationProp(
-        c.watch<Deps>().duration, // get duration from Provider
+        c.watch<Deps>().seconds, // get duration from Provider
         vsync: w.vsync, // Get vsync from the current widget,
         autoStart: false,
       );
@@ -133,7 +145,7 @@ class BasicSyncStateless extends PropsWidget<BasicSyncStateless> {
     return Container(
       decoration: BoxDecoration(color: fillColor, border: Border.all(color: borderColor, width: 10)),
       alignment: Alignment.center,
-      child: Text("ticker: $vsync, $label, duration: ${deps.duration}",
+      child: Text("ticker: $vsync, $label, duration: ${deps.seconds}",
           style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 22)),
     );
   }

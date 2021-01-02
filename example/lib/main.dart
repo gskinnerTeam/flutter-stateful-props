@@ -116,10 +116,10 @@ class _ProviderMenuState extends State<ProviderMenu> with TickerProviderStateMix
             onPressed: () => deps.toggle = !deps.toggle,
           ),
           OutlineButton(
-            child: Text("Duration: ${deps.duration}"),
+            child: Text("Duration: ${deps.seconds}"),
             onPressed: () {
-              deps.duration++;
-              if (deps.duration > 3) deps.duration = .5;
+              deps.seconds++;
+              if (deps.seconds > 3) deps.seconds = .5;
             },
           ),
           OutlineButton(
@@ -145,8 +145,8 @@ class Deps extends ChangeNotifier {
     notifyListeners();
   }
 
-  double get duration => _duration;
-  set duration(double duration) {
+  double get seconds => _duration;
+  set seconds(double duration) {
     _duration = duration;
     notifyListeners();
   }

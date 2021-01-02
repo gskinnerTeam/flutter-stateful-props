@@ -21,7 +21,7 @@ Flutter has a problem: **there is no great way to re-use stateful behavior acros
 
 This manifests in some common pain-points:
 * Having to `override dispose` for controllers, timers, streams etc
-* Having to `override didUpdateDependencies/didChangeWidget` to sync state with dependencies
+* Having to `override didChangeDependencies/didUpdateWidget` to sync state with dependencies
 * Having to calling `setState((){})` each time you want to change some state and rebuild (which almost always go together)
 * Having to use Widgets or Builders to encapsulate some non-visual state or behavior, hurting readability
 
@@ -66,7 +66,7 @@ There are several things to note here:
 
 Already with this simple example, you can begin to see the benefits. A couple potential bugs have been eliminated, the Widget itself is more readable and maintainable when `dispose` does not exist, and we do not need to introduce builders into our tree.
 
-## Use Case 2: Having to override `didUpdateDependencies` and `didChangeWidget`
+## Use Case 2: Having to override `didChangeDependencies` and `didUpdateWidget`
 Probably the biggest pain-point in Flutter currently is keeping internal controllers synced with the outside state, either from the Widget or the Context (using `Provider` or `InheritedWidget`). 
 
 For example, if you create something like this inside `initState`: 
@@ -75,7 +75,7 @@ anim1 = AnimationController(
    duration: widget.duration, 
    vsync: Provider.of<TickerProvider>(context, listen: false))
 ```
-This Controller will become out of sync if either of these dependencies change in the future. It's up to you to override `didChangeWidget` and implement the diff-check your self: `if(oldWidget.foo != widget.foo) // blah blah blah`. This is confusing for new devs, annoying for experienced devs, and prone to bugs for all.
+This Controller will become out of sync if either of these dependencies change in the future. It's up to you to override `didUpdateWidget` and `didChangeDependencies` and implement the diff-check your self: `if(oldWidget.foo != widget.foo) // blah blah blah`. This is confusing for new devs, annoying for experienced devs, and prone to bugs for all.
 
 `StatefulProps` solves this issue by using a `syncProp()` call when registering your Props:
 ```dart
