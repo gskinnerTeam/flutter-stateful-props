@@ -7,7 +7,7 @@ _We're asking everyone to please try it out, and [log any issues that you find](
 ### 🔨 Installation
 ```yaml
 dependencies:
-  stateful_props: ^0.1.3
+  stateful_props: ^0.1.4
 ```
 
 ### ⚙ Import
