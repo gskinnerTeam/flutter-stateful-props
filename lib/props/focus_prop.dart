@@ -39,7 +39,7 @@ class FocusProp extends StatefulProp<FocusProp> {
     _node.canRequestFocus = canRequestFocus = newProp.canRequestFocus;
     _node.descendantsAreFocusable = descendantsAreFocusable = newProp.descendantsAreFocusable;
     // Callbacks
-    onChanged = newProp.onChanged ?? onChanged;
+    onChanged = newProp.onChanged;
   }
 
   @override
