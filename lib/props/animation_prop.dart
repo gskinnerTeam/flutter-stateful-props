@@ -47,7 +47,7 @@ class AnimationProp extends StatefulProp<AnimationProp> implements TickerProvide
       upperBound: upperBound,
       animationBehavior: animationBehavior,
     );
-    // Add listener to keep the restorable state in sync, also optionally to rebuild the view on tick.
+    // Add listener to dispatch change events and (optionally) to rebuild the view on tick.
     _controller.addListener(_handleAnimationTick);
     if (autoStart) _controller.forward();
   }
