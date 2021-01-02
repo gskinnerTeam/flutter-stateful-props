@@ -18,10 +18,6 @@ class FocusProp extends StatefulProp<FocusProp> {
   // Callbacks
   void Function(FocusProp value) onChanged;
 
-  // Helper methods
-  FocusNode get node => _node;
-  bool get hasFocus => _node.hasFocus;
-
   // Internal state
   FocusNode _node;
 
@@ -38,18 +34,10 @@ class FocusProp extends StatefulProp<FocusProp> {
 
   @override
   void update(FocusProp newProp) {
-    if (compareValuesForChange(debugLabel, newProp.debugLabel)) {
-      _node.debugLabel = debugLabel = newProp.debugLabel;
-    }
-    if (compareValuesForChange(skipTraversal, newProp.skipTraversal)) {
-      skipTraversal = _node.skipTraversal = newProp.skipTraversal;
-    }
-    if (compareValuesForChange(canRequestFocus, newProp.canRequestFocus)) {
-      canRequestFocus = _node.canRequestFocus = newProp.canRequestFocus;
-    }
-    if (compareValuesForChange(canRequestFocus, newProp.descendantsAreFocusable)) {
-      descendantsAreFocusable = _node.descendantsAreFocusable = newProp.descendantsAreFocusable;
-    }
+    _node.debugLabel = debugLabel = newProp.debugLabel;
+    _node.skipTraversal = skipTraversal = newProp.skipTraversal;
+    _node.canRequestFocus = canRequestFocus = newProp.canRequestFocus;
+    _node.descendantsAreFocusable = descendantsAreFocusable = newProp.descendantsAreFocusable;
     // Callbacks
     onChanged = newProp.onChanged ?? onChanged;
   }
@@ -58,4 +46,8 @@ class FocusProp extends StatefulProp<FocusProp> {
   void dispose() => _node.dispose();
 
   void _handleFocusChanged() => onChanged?.call(this);
+
+  // Helper methods
+  FocusNode get node => _node;
+  bool get hasFocus => _node.hasFocus;
 }

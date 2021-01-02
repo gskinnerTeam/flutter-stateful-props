@@ -107,9 +107,9 @@ class StatefulPropsManager<W extends Widget> {
   //    * Use the current context and widget, to create a newProp.
   //    * Pass that newProp to each existingProp so they can update themselves.
   // The existingProps are mutable and do not get replaced, they just consume and discard newProp.
-  void didUpdateWidget() {
+  void syncProps() {
+    // Sync any props that have a create method:
     _values.forEach((property) {
-      // Sync any props that have a create method
       if (property.create != null) {
         StatefulProp<dynamic> newProp = property.create(getContext(), widget);
         property.update(newProp);

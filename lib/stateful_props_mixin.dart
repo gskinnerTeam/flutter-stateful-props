@@ -4,8 +4,11 @@ import 'package:flutter/widgets.dart';
 import 'stateful_props_manager.dart';
 
 mixin StatefulPropsMixin<W extends StatefulWidget> on State<W> {
+  @protected
   StatefulPropsManager _propsManager = StatefulPropsManager<W>();
 
+  int get buildCount => _propsManager.buildCount;
+  bool _propsDirty = false;
   @override
   @protected
   void initState() {
@@ -15,7 +18,6 @@ mixin StatefulPropsMixin<W extends StatefulWidget> on State<W> {
     _propsManager.widget = widget;
     _propsManager.setState = setState;
     _propsManager.mounted = true;
-    initProps();
   }
 
   /// Optional: Safe place to initialize props.
@@ -46,17 +48,31 @@ mixin StatefulPropsMixin<W extends StatefulWidget> on State<W> {
   @override
   @protected
   Widget build(BuildContext _) {
+    // Call initProps from within Build. This is so we can use Provider.watch instead of .read, inside of initProps.
+    if (_propsManager.buildCount == 0) {
+      initProps();
+    } else if (_propsDirty) {
+      _propsDirty = false;
+      _propsManager.syncProps();
+    }
     // Each Prop can wrap the Widget's tree with 1 or more Widgets, they are called in top-down order.
     Widget children = _propsManager.buildProps((c) => buildWithProps(c));
+    _propsManager.buildCount++;
     return children;
   }
 
   @override
   void didUpdateWidget(W _) {
-    _propsManager.didUpdateWidget();
+    _propsDirty = true;
     // Pass the latest widget into the propsManager
     _propsManager.widget = widget;
     super.didUpdateWidget(_);
+  }
+
+  @override
+  void didChangeDependencies() {
+    _propsDirty = true;
+    super.didChangeDependencies();
   }
 
   @override

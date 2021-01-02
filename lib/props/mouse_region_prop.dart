@@ -27,15 +27,6 @@ class MouseRegionProp extends StatefulProp<MouseRegionProp> {
   void Function(PointerEnterEvent event) onEnter;
   void Function(PointerExitEvent event) onExit;
 
-  // Helper methods
-  Offset get position => _pos;
-  Offset get localPosition => _localPos;
-  bool get isHovered => _isHovered;
-  Offset get normalizedPosition => Offset(
-        (position.dx / _viewSize.width).clamp(0.0, 1.0) as double,
-        (position.dy / _viewSize.height).clamp(0.0, 1.0) as double,
-      );
-
   // Internal state
   Size _viewSize = Size(1, 1);
   Offset _pos = Offset.zero;
@@ -83,4 +74,13 @@ class MouseRegionProp extends StatefulProp<MouseRegionProp> {
     _localPos = localPosition ?? _localPos;
     setState(() {});
   }
+
+  // Helper methods
+  Offset get position => _pos;
+  Offset get localPosition => _localPos;
+  bool get isHovered => _isHovered;
+  Offset get normalizedPosition => Offset(
+        (position.dx / _viewSize.width).clamp(0.0, 1.0) as double,
+        (position.dy / _viewSize.height).clamp(0.0, 1.0) as double,
+      );
 }

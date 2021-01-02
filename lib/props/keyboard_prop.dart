@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:stateful_props/props/focus_prop.dart';
 import '../stateful_props_manager.dart';
 
 //TODO: Update RawKeyboardProp so it can make it's own node internally... ideally it can use the Property?
@@ -7,7 +8,7 @@ import '../stateful_props_manager.dart';
 // We basically want a lazy addProp and syncProp implementation... where something is added on request, and only once.
 class KeyboardProp extends StatefulProp<KeyboardProp> {
   KeyboardProp({
-    @required this.focusNode,
+    this.focusNode,
     this.autofocus = true,
     this.includeSemantics = true,
     this.key,
@@ -22,11 +23,17 @@ class KeyboardProp extends StatefulProp<KeyboardProp> {
   ValueChanged<RawKeyEvent> onPressed;
 
   @override
+  void init() {
+    if (focusNode == null) {
+      focusNode = addProp(FocusProp());
+    }
+  }
+
+  @override
   void update(KeyboardProp newProp) {
-    focusNode = newProp.focusNode;
+    focusNode = newProp.focusNode ?? focusNode;
     autofocus = newProp.autofocus;
     includeSemantics = newProp.includeSemantics;
-    key = newProp.key;
     // Callbacks
     onPressed = newProp.onPressed;
   }

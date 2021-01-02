@@ -11,10 +11,6 @@ class ScrollProp extends StatefulProp<ScrollProp> {
   // Callbacks
   void Function(ScrollProp prop) onChanged;
 
-  // Helper Methods
-  ScrollPosition get position => _controller.position;
-  ScrollController get controller => _controller;
-
   // Internal state
   ScrollController _controller;
 
@@ -30,11 +26,15 @@ class ScrollProp extends StatefulProp<ScrollProp> {
 
   @override
   void update(ScrollProp newProp) {
-    onChanged = newProp.onChanged ?? onChanged;
+    onChanged = newProp.onChanged;
   }
 
   @override
   void dispose() => _controller.dispose();
 
   void _handleScrollChanged() => onChanged?.call(this);
+
+  // Helper Methods
+  ScrollPosition get position => _controller.position;
+  ScrollController get controller => _controller;
 }

@@ -13,11 +13,6 @@ class LayoutProp extends StatefulProp<LayoutProp> {
   Key key;
   bool measureContext;
 
-  //Helper methods
-  BoxConstraints get constraints => _constraints;
-  Size get parentSize => _constraints.biggest;
-  Size get contextSize => _contextSize;
-
   //Internal state
   BoxConstraints _constraints = BoxConstraints();
   Size _contextSize;
@@ -52,4 +47,9 @@ class LayoutProp extends StatefulProp<LayoutProp> {
           },
         );
   }
+
+  //Helper methods
+  BoxConstraints get constraints => _constraints;
+  Size get parentSize => _constraints.biggest;
+  Size get contextSize => _contextSize;
 }

@@ -10,10 +10,6 @@ class TextEditProp extends StatefulProp<TextEditProp> {
   // Callbacks
   void Function(TextEditProp) onChanged;
 
-  // Helper methods
-  String get text => _controller.text;
-  TextEditingController get controller => _controller;
-
   // Internal state
   TextEditingController _controller;
 
@@ -32,4 +28,8 @@ class TextEditProp extends StatefulProp<TextEditProp> {
 
   @override
   void dispose() => _controller.dispose();
+
+  // Helper methods
+  String get text => _controller.text;
+  TextEditingController get controller => _controller;
 }

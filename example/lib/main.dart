@@ -1,6 +1,7 @@
 import 'package:example/optimized_rebuilds.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 import 'package:stateful_props/props/future_prop.dart';
 import 'package:stateful_props/stateful_props.dart';
 
@@ -43,126 +44,118 @@ class StatefulPropsDemo extends StatefulWidget {
   _StatefulPropsDemoState createState() => _StatefulPropsDemoState();
 }
 
-class _StatefulPropsDemoState extends State<StatefulPropsDemo> with SingleTickerProviderStateMixin {
+class _StatefulPropsDemoState extends State<StatefulPropsDemo> {
   int _index = 0;
 
   @override
   Widget build(BuildContext context) {
-    Widget _makeBtn(int index) => FlatButton(
-          onPressed: () => setState(() => _index = index),
-          child: Text(widgets[index].title,
-              style: TextStyle(fontWeight: _index == index ? FontWeight.bold : FontWeight.normal)),
-          padding: EdgeInsets.symmetric(vertical: 40),
-        );
-    return RootRestorationScope(
-      restorationId: "statefulDemo",
-      child: Column(children: [
-        // Content
-        Expanded(
-          child: AnimatedSwitcher(
-            duration: Duration(milliseconds: 300),
-            child: widgets[_index].builder.call(),
-          ),
+    // Create a list of btns for each experiment
+    List<Widget> bottomBtns = List.generate(widgets.length, (index) => Expanded(child: _buildBtn(index)));
+    // Provide a ChangeNotifier any of the Examples can use
+    return ChangeNotifierProvider(
+      create: (_) => Deps(),
+      // Provide root restoration scope in case some of the demos want to test it
+      child: RootRestorationScope(
+        restorationId: "statefulDemo",
+        child: Row(
+          children: [
+            /// ///////////////////////////
+            /// Left Menu (Provider Config)
+            ProviderMenu(),
+            Expanded(
+              child: Column(children: [
+                /// ///////////////////////////
+                /// Main Content
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: Duration(milliseconds: 300),
+                    child: widgets[_index].builder.call(),
+                  ),
+                ),
+
+                /// ///////////////////////////
+                /// Bottom Menu
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: bottomBtns)
+              ]),
+            ),
+          ],
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(widgets.length, (index) {
-            return Expanded(child: _makeBtn(index));
-          }),
-        )
-      ]),
+      ),
+    );
+  }
+
+  Widget _buildBtn(int index) {
+    return FlatButton(
+      padding: EdgeInsets.symmetric(vertical: 40),
+      onPressed: () => setState(() => _index = index),
+      child: Text(
+        widgets[index].title,
+        style: TextStyle(fontWeight: _index == index ? FontWeight.bold : FontWeight.normal),
+      ),
     );
   }
 }
 
-/*
-* StreamBuilder
-* MouseRegion
-* LayoutBuilder
-* Primitives
-* GestureProp
-* MultipleAnimations
-*/
-
-// "Hello World" Examples
-
-class HelloWorld extends StatefulWidget {
+class ProviderMenu extends StatefulWidget {
   @override
-  //_HelloFutureState createState() => _HelloFutureState();
-  //_HelloTimerState createState() => _HelloTimerState();
-  //_HelloTextEditingState createState() => _HelloTextEditingState();
-  //_HelloTextEditingState createState() => _HelloTextEditingState();
-  _HelloFocusNodeState createState() => _HelloFocusNodeState();
+  _ProviderMenuState createState() => _ProviderMenuState();
 }
 
-// Run a repeating timer that will be automatically cleaned up on dispose()
-class _HelloTimerState extends State<HelloWorld> with StatefulPropsMixin {
-  TimerProp timer;
-  IntProp intProp;
-  @override
-  void initProps() {
-    intProp = addProp(IntProp());
-    // No need to cancel this, it's already handled
-    timer = addProp(TimerProp(.5, (_) => intProp.value++, periodic: true));
-  }
-
-  @override
-  Widget buildWithProps(BuildContext context) => Text("Ticks: ${intProp.value}");
-}
-
-// Create a couple TextFields with some FocusNodes:
-class _HelloTextEditingState extends State<HelloWorld> with StatefulPropsMixin {
-  TextEditProp textEdit1;
-
-  @override
-  void initProps() {
-    textEdit1 = addProp(TextEditProp(onChanged: (prop) => print(prop.text)));
-  }
-
-  @override
-  Widget buildWithProps(BuildContext context) => TextField(controller: textEdit1.controller);
-}
-
-// Create a FocusNode and count when it throws an event:
-class _HelloFocusNodeState extends State<HelloWorld> with StatefulPropsMixin {
-  FocusProp focus1;
-  IntProp focusCount;
-
-  @override
-  void initProps() {
-    focus1 = addProp(FocusProp(onChanged: (_) => focusCount.increment()));
-    focusCount = addProp(IntProp());
-  }
-
-  @override
-  Widget buildWithProps(BuildContext context) {
-    return Column(
-      children: [TextField(focusNode: focus1.node), TextField(), Text("FocusEvent Count: $focusCount")],
-    );
-  }
-}
-
-// Load a future when widget is mounted, and refresh it on tap
-class _HelloFutureState extends State<HelloWorld> with StatefulPropsMixin {
-  FutureProp<String> future;
-
-  @override
-  void initProps() {
-    // Load a future when the widget is first mounted
-    future = addProp(FutureProp(initial: _loadData()));
-    // Refresh when the widget is tapped
-    addProp(TapProp(() => future.value = _loadData()));
-  }
-
-  Future<String> _loadData() => Future.delayed(Duration(seconds: 1), () => "result");
-
-  @override
-  Widget buildWithProps(BuildContext context) => Text("${future.snapshot.hasData}");
-}
-
-class _HelloStreamState extends State<HelloWorld> {
+class _ProviderMenuState extends State<ProviderMenu> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    Deps deps = Provider.of(context);
+    return Container(
+      padding: EdgeInsets.all(24),
+      color: Colors.grey.shade300,
+      child: Column(
+        children: [
+          Text("Provided Values", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          OutlineButton(
+            child: Text("Toggle: ${deps.toggle}"),
+            onPressed: () => deps.toggle = !deps.toggle,
+          ),
+          OutlineButton(
+            child: Text("Duration: ${deps.duration}"),
+            onPressed: () {
+              deps.duration++;
+              if (deps.duration > 3) deps.duration = .5;
+            },
+          ),
+          OutlineButton(
+            child: Text("Inject Vsync: ${deps.vsync == null ? "false" : "true"}"),
+            onPressed: () {
+              deps.vsync = deps.vsync == null ? this : null;
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
+
+class Deps extends ChangeNotifier {
+  TickerProvider _vsync;
+  double _duration = 1;
+  bool _toggle = false;
+
+  bool get toggle => _toggle;
+  set toggle(bool toggle) {
+    _toggle = toggle;
+    notifyListeners();
+  }
+
+  double get duration => _duration;
+  set duration(double duration) {
+    _duration = duration;
+    notifyListeners();
+  }
+
+  TickerProvider get vsync => _vsync;
+  set vsync(TickerProvider vsync) {
+    _vsync = vsync;
+    notifyListeners();
+  }
+}
+
+Deps deps = Deps();

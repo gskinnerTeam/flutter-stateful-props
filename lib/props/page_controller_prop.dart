@@ -11,10 +11,6 @@ class PageControllerProp extends StatefulProp<PageControllerProp> {
   // Callbacks
   void Function(PageControllerProp prop) onChanged;
 
-  // Helper Methods
-  ScrollPosition get position => _controller.position;
-  PageController get controller => _controller;
-
   // Internal state
   PageController _controller;
 
@@ -30,11 +26,15 @@ class PageControllerProp extends StatefulProp<PageControllerProp> {
 
   @override
   void update(PageControllerProp newProp) {
-    onChanged = newProp.onChanged ?? onChanged;
+    onChanged = newProp.onChanged;
   }
 
   @override
   void dispose() => _controller.dispose();
 
   void _handlePageChanged() => onChanged?.call(this);
+
+  // Helper Methods
+  ScrollPosition get position => _controller.position;
+  PageController get controller => _controller;
 }

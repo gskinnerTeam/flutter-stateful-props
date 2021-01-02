@@ -27,21 +27,6 @@ This manifests in some common pain-points:
 
 `StatefulProps` offers a solution to this: "Props". Small, encapsulated state objects, tied to the lifecycle of the Widget. Each Widget has a list of these "mini states". Props can `init` and `dispose` themselves, they can add Widgets to the tree, and they can sync themselves when dependencies change.
 
-In terms of their interface, a `StatefulProp` looks like this, where **all the overrides are optional**:
-```dart
-abstract class StatefulProp<T> {
-  // Optional overrides, to hook into the widget lifecycle
-  void init() {}
-  void update(T newProp) {}
-  void dispose() {}
-  // Optional override, lets a Prop wrap Widgets if it wants
-  ChildBuilder getBuilder(ChildBuilder childBuild) => childBuild;
-  // Allow Prop to support Restoration if it wants
-  void restoreState(void Function(RestorableProperty<Object> property, String restorationId) register) {}
-}
-```
-All Props are injected some basic references to the state like `context` and a `setState()` callback. **With this simple architecture, we can solve all of the above problems!**
-
 If you'd like to jump right some comparison code, check out the [Basic Animation Example](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/example/lib/basic_animator.dart ) where we show both Classic and `StatefulProps` implementations.
 
 ## 💡 Inspiration
@@ -51,12 +36,6 @@ For more on extensibility and custom Props scroll down to **Creating your own Pr
 
 ## 🕹️ Usage
 Out of the box it comes with [all the standard Props](https://github.com/gskinnerTeam/flutter-stateful-props/tree/master/lib/props) you'll need (`AnimationProp`, `TextEditProp`, `FocusProp`, `FutureProp` etc) but you can declare your own Props extremely easily as well. 
-
-The core set of props provide some opinionated syntactic sugar where we think it's useful. They have a focus on pragmatism and brevity, over strict 1:1 adherence to the underlying Flutter API. For example: `onChange` events will contain the payload you would expect rather than the empty ones Flutter often provides; `AnimationProps` take a `double` over `Duration`; etc.  
-
-**It is important to note that the opinionated nature of the core Props is seperate from the underlying system. A set of Props with strict-adherence would be very easy to create if someone were so inclined.** The average size of a Prop in the lib now is around 40 lines, and that's with the syntactic sugar.
-
-With the preamble out of the way, lets look at some code!
 
 ## Use Case 1: Disposing controllers, timers, streams etc
 One of the main sources of runtime errors in Flutter is an `AnimationController`, or `Timer`, that is not disposed properly. Basically anything that needs to be synced to `unmount()` is error prone, because a developer can easily forget about it without any compiler warnings.
@@ -447,6 +426,12 @@ As you can see composition is very easy, it has one rule:
 * **any Prop can `add`/`sync` any other Prop, as long as they do it in `init()`!** 
 
 We're still scratching the surface of what can be done here, and excited to see what people come up with.
+
+
+## Syntactic Sugar
+The core set of props provide some opinionated syntactic sugar where we think it's useful. They have a focus on pragmatism and brevity, over strict 1:1 adherence to the underlying Flutter API. For example: `onChange` events will contain the payload you would expect rather than the empty ones Flutter often provides; `AnimationProps` take a `double` over `Duration`; etc.  
+
+**It is important to note that the opinionated nature of the core Props is seperate from the underlying system. A set of Props with strict-adherence would be very easy to create if someone were so inclined.** The average size of a Prop in the lib now is around 40 lines, and that's with the syntactic sugar.
 
 
 ## 📝 Contributing
