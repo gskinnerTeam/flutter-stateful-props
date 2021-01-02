@@ -63,7 +63,7 @@ class AnimationProp extends StatefulProp<AnimationProp> implements TickerProvide
       _controller.resync(vsync);
     }
     // Callbacks
-    onTick = newProp.onTick ?? onTick;
+    onTick = newProp.onTick;
   }
 
   @override
