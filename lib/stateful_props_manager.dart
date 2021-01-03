@@ -39,7 +39,7 @@ class StatefulPropsManager<W extends Widget> {
   // Calls addProp() and also injects the `create` method into the prop, so it can be called later.
   T syncProp<T>(StatefulProp<dynamic> Function(BuildContext c, W w) create, [String restoreId]) {
     // Use the builder to create the first instance of the property.
-    StatefulProp<dynamic> prop = addProp(create(getContext(), widget));
+    StatefulProp<dynamic> prop = addProp(create(getContext(), widget), restoreId);
     // Inject the create builder so we can compare on didUpdateWidget
     prop.create = create as StatefulProp<dynamic> Function(BuildContext, Widget);
     return prop as T;
@@ -79,7 +79,7 @@ class StatefulPropsManager<W extends Widget> {
     if (_propsByKey.containsKey(key) == false) {
       // Add prop to Map and register with the manager using the same addProp() as the StatefulMixin
       _propsByKey[key] = prop;
-      addProp(prop);
+      addProp(prop, restoreId);
     } else if (logDuplicateRefWarnings) {
       print(
           "WARNING @ $widget: addProp(Ref) was called twice on the same Ref object. Check that you aren't calling addProp() twice with the same reference, this is likely a mistake.");
