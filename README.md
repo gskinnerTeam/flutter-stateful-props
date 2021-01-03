@@ -53,7 +53,7 @@ class _MyViewState extends State with StatefulPropsMixin {
     }
     
     @override
-    Widget buildWithProp(BuildContext c){
+    Widget buildWithProps(BuildContext c){
         return FadeTransition(opacity: anim1.controller, ...);
     }
 }
@@ -240,7 +240,7 @@ class MyView extends PropsWidget {
     }
     
     @override
-    Widget buildWithProp(BuildContext c){
+    Widget buildWithProps(BuildContext c){
         return FadeTransition(opacity: anim1Prop.controller, ...);
     }
 }
