@@ -86,40 +86,30 @@ animProp1 = syncProp((c, w) => AnimationProp(
 That's all you have to do! The `.duration` and `.vsync` values will always stay in sync with the Widget and Context, no `override` necessary, **no bugs possible**. All you have to do is remember to use `syncProp` instead of `addProp`, the `StatefulProp` will take care of the sync and the diff.
 
 ## Use Case 3: Having to call setState all the time
-This is a minor one in comparison to the others, but it does get pretty annoying after a while, and it can lead to bugs occasionally.
-
-Currently, anytime you want to update the view, you need to wrap your state change in `setState((){}))`, inevitably this begins to hurt readability, and you will either write a `function setFoo(value)`, use a ValueNotifier + Builder, or encapsulate the variable with `get foo` and `set foo` accessors. Either way it costs you a few lines and some wasted typing. No big deal with 1 field, but after 3 or 4, this gets pretty ugly and can begin to overwhelm your more important code. 
-
 `StatefulProps` solves this in a very simple way. There are simple primitive Props, like `IntProp`, `BoolProp`, that act as `ValueNotifier` style objects that **call `setState` when they change**. Useful for storing a simple `isLoading` or `currentTab` value. To build the basic `CounterApp` for example, we can just use an `IntProp _counter` and do `_counter.value++`:
 ```dart
     IntProp _counter;
-    
-    @override 
+
+    @override
     void initProps(){
         _counter = addProp(IntProp(0));
-    } 
-    
+    }
+
     void _handleBtnPressed() => _counter.value++; //setState is handled by Prop
-    
-    @override 
+
+    @override
     Widget buildWithProps(BuildContext context){
         return FlatButton(child: Text("${_counter.value}"), onPressed: _handleBtnPressed);
     }
 ```
-Notice no `setState` call needed. No valueListenable, no builders, just change the value and it rebuilds.
-
-With just one variable there is not much difference, but add a few more, and this code looks substantially cleaner with `StatefulProps`.
-
-Another benefit of using these primitive Props, is that you will get Restoration support essentially for free (coming soon!). If you're not familiar with Restoration API, you [can read up on it here](https://docs.google.com/document/d/1KIiq5CdqnSXxQXbZIDy2Ukc-JHFyLak1JR8e2cm3eO4/edit).
+Notice no `setState` call needed. No ValueListenables or Builders, no Accessors. Just change the value and it rebuilds. With just one variable there is not much difference, but add a few more, and this code looks substantially cleaner with `StatefulProps`. **Another benefit of using these primitive Props, is that you will get Restoration support (almost) for free**. If you're not familiar with Restoration API, you [can read up on it here](https://docs.google.com/document/d/1KIiq5CdqnSXxQXbZIDy2Ukc-JHFyLak1JR8e2cm3eO4/edit).
 
 ## Use Case 4: Having to use Widgets/Builders for non-visual behaviors, leading to nesting hell
-Builders actually do a great job of _encapsulating_ logic and state, the problem with them is _readability_. 4 out of 5 ~~dentists~~ developers agree: nesting sucks when it comes to reading code. It also kinda sucks when writing. No one wants to deal with lining up endless brackets, moving things around is harder than it should be, and your more important content can get lost in a sea of behavioral wrappers.
+Builders actually do a great job of _encapsulating_ logic and state, the problem with them is _readability_. 4 out of 5 ~~dentists~~ developers agree: nesting sucks when it comes to reading (and writing) code. No one enjoys matching up endless brackets, re-arranging the tree becomes harder than it should be, and your more important content can get lost in a sea of behavioral wrappers.
 
 `StatefulProps` solves this by allowing each Prop to wrap your tree, in additional Widgets. With this we can collapse many common Builders to a 1 or 2 lines and remove all indentation. Widgets like `GestureDetector`, `LayoutBuilder`, `TweenAnimationBuilder`, `MouseRegion`, `RawKeyboardListener` are all essentially replaced by `StatefulProps`.
 
-Lets say we had a button widget that is clickable (+`GestureDetector`), but also needs to know it's parent's size so it can make some responsive decisions (+`LayoutBuilder`). On top of that, we want to detect when the mouse is over the widget (+`MouseRegion`), and we want to listen to the Keyboard to support the [ENTER] key (+`RawKeyboardListener`). On top of all that, lets say we want to run a Future when something happens (+`FutureBuilder`).
-
-You probably see where we are going with this :D In vanilla Flutter, we're looking at something like this:
+Imaging some desktop style button which might need the following builders:
 ```
   Widget build(BuildContext _) {
     print(_isOver.isHovered);
@@ -144,25 +134,22 @@ You probably see where we are going with this :D In vanilla Flutter, we're looki
       ),
     );
 ```
-
-This is ~20 lines of code of pure boilerplate and a mess of indents. Before we've even written a single line of unique code! **As an experiment, try and find the 3 `print()` calls and the `//Build Tree` above.** Not super fun, right? That was way harder than it ought to be.
-
 With `StatefulProps`, this all just goes away:
 ```
     LayoutProp _layout;
     MouseRegionProp _mouse;
     FutureProp _futureProp;
-    
-    @override 
+
+    @override
     void initProps(){
         _layout = addProp(LayoutProp());
         _mouse = addProp(MouseRegionProp());
         _futureProp = addProp(FutureProp(_loadData())
         addProp(TapProp(() => _futureProp.future = _loadData())));
         addProp(KeyboardProp(onPressed: _handleKeyPressed)
-    } 
-    
-    @override 
+    }
+
+    @override
     Widget buildWithProps(BuildContext context){
        print(_layout.size.width);
        print(_mouse.isHovered);
@@ -171,12 +158,12 @@ With `StatefulProps`, this all just goes away:
     }
 ```
 
-Notice how much easier everything is to parse here, finding the unique/custom code is now extremely easy. Removing the nesting allows us to present the display tree clearly and without visual clutter. Our unique code is front and center, and the boilerplate and nesting is just gone! 
+Notice how much easier everything is to parse here, finding the unique/custom code is now extremely easy. Removing the nesting allows us to present the display tree clearly and without visual clutter. Our unique code is front and center, and the boilerplate and nesting is just gone!
 
 Another interesting thing to note is that we do not keep a reference to the `TapProp` or the `KeyboardProp`. Since we are only interested in the callbacks we just call `addProp()` and forget about them. `StatefulProps` will handle everything whether you keep a reference or not. We _will_ keep a handle to `layout`, `futureProp` and `mouse` because we want to use those later in our `buildWithProps()` method.
 
 ### Optimizing rebuilds
-Use the included `NotifiersBuilder` to rebuild portions of the tree. It simply takes a list of `ChangeNotifiers` and rebuilds when any of them change. All of the primitives are `ChangeNotifiers` and can turn off their default "autoBuild" behavior. 
+Use the included `NotifiersBuilder` to rebuild portions of the tree. It simply takes a list of `ChangeNotifiers` and rebuilds when any of them change. All of the primitives are `ChangeNotifiers` and can turn off their default "autoBuild" behavior.
 ```dart
   IntProp _counter;
   BoolProp _toggle;
@@ -209,10 +196,10 @@ Use the included `NotifiersBuilder` to rebuild portions of the tree. It simply t
 ```
 
 ## A word about dispose()
-It is quite rare to need `dispose()` within your main `State<T>` as Props (by design) clean up their own state. However, if needed you can override the standard `dispose()` method, and do your thing! 
+It is quite rare to need `dispose()` within your main `State<T>` as Props (by design) clean up their own state. However, if needed you can override the standard `dispose()` method, and do your thing!
 
 ## 👀  PropsWidget
-Sometimes you really just don't want to create 2 classes for a simple Widget with a bit of State. That's where `PropsWidget` comes in. They are single-class variations of `StatefulPropsMixin` that are slightly cludgier to use, but they avoid the readability and line-count hit of having 2 classes. 
+Sometimes you really just don't want to create 2 classes for a simple Widget with a bit of State. That's where `PropsWidget` comes in. They are single-class variations of `StatefulPropsMixin` that are slightly cludgier to use, but they avoid the readability and line-count hit of having 2 classes.
 
 They do not replace `StatefulWidget`, but they are quite useful for when you want to attach just 1 or 2 pieces of state to an otherwise basic Widget.
 
@@ -235,13 +222,13 @@ class MyView extends PropsWidget {
 
     @override
     initProps(){
-      addProp(_anim1, AnimationProp(.1, autoStart: false)); 
+      addProp(_anim1, AnimationProp(.1, autoStart: false));
       // The use() call in the closure is fine, cause it's not called right now
       final anim = addProp(_timer, TimerProp(.5, ()=>anim1Prop.controller.forward(), repeat: true)));
       // If we need to use a prop here, we can just use the instance returned from add/sync
-      anim.controller.forward(); 
+      anim.controller.forward();
     }
-    
+
     @override
     Widget buildWithProps(BuildContext c){
         return FadeTransition(opacity: anim1Prop.controller, ...);
@@ -249,16 +236,11 @@ class MyView extends PropsWidget {
 }
 ```
 
-**This is the entire Widget!** No extra 5 lines of boilerplate. As you can see, there is some trade-off here between the increased boilerplate and complexity of `use(...)` and `Ref()` vs. the reduced line count and readability win of a single Class. 
+**This is the entire Widget!** No extra 5 lines of boilerplate. As you can see, there is some trade-off here between the increased boilerplate and complexity of `use(...)` and `Ref()` vs. the reduced line count and readability win of a single Class. You can decide which you like best and where. From our experience, `PropsWidget` is really handy for up to 3 props, and at that point a StatefulWidget is probably a better choice.
 
-This image shows a nice comparison of the 2 approaches with the full class declarations shown:
-[![](https://user-images.githubusercontent.com/736973/103252079-826b5300-4938-11eb-9eae-85a9dab75a7a.png)](https://user-images.githubusercontent.com/736973/103252079-826b5300-4938-11eb-9eae-85a9dab75a7a.png)
+**WARNING:** If you forget to make your Refs `static` the state will be lost, and the compiler will give no warning here. As such this approach is slightly less robust than the Mixin.
 
-This also shows the point where the boilerplate of the PropsWidget is getting a bit heavy, and the Mixin is looking a little more appealing. 
-
-You can decide which you like best and where. In our experience the `PropsWidget` works great up to 2 or 3 Props, and after that a `StatefulPropsMixin` becomes a little nicer to work with as the `Ref` and `use` boilerplate adds up.
-
-## 👀  MOAR CODE!
+## EXAMPLES
 Below are some samples showing some different use cases that can be done with the core Props.
 
 In all cases assume these code examples are inside of a `State with StatefulPropsMixin`. Everything here can be done in a `PropsWidget` as well, but we'll show the mixin versions as the code reads a little cleaner.
