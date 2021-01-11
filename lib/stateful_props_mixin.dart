@@ -1,6 +1,7 @@
 // This mixin is just a light proxy around lifecycle events and a wrapper around build()
 // [StatefulPropsManager] does most of the work here.
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'stateful_props_manager.dart';
 
 mixin StatefulPropsMixin<W extends StatefulWidget> on State<W> {
@@ -31,9 +32,11 @@ mixin StatefulPropsMixin<W extends StatefulWidget> on State<W> {
 
   /// ///////////////////////////////////////
   /// Register Props
-  T syncProp<T>(StatefulProp<dynamic> Function(BuildContext c, W w) create, [String restoreId]) {
+  T syncProp<T>(StatefulProp<dynamic> Function(BuildContext c, W w) create,
+      [String restoreId]) {
     //Because we can't cast generics of sub-classes, we have to do this little closure wrap-trick
-    StatefulProp<dynamic> Function(BuildContext c, Widget w) callback = (c, w) => create(c, w as W);
+    StatefulProp<dynamic> Function(BuildContext c, Widget w) callback =
+        (c, w) => create(c, w as W);
     return _propsManager.syncProp(callback, restoreId);
   }
 
@@ -82,6 +85,12 @@ mixin StatefulPropsMixin<W extends StatefulWidget> on State<W> {
     _propsManager.dispose();
     disposeProps();
     super.dispose();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    _propsManager.debugFillProperties(properties);
   }
 
   /// //////////////////////////////////////

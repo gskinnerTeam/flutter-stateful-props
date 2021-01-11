@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'stateful_props.dart';
@@ -29,19 +30,24 @@ class StatefulPropsManager<W extends Widget> {
   // Widget/State Dependencies
   void Function(VoidCallback) setState;
   W widget;
+
   // Prop might needs to know if the view is mounted, this will hold that state.
   bool mounted = false;
 
   BuildContext _context;
+
   void setContext(BuildContext value) => _context = value;
+
   BuildContext getContext() => _context;
 
   // Calls addProp() and also injects the `create` method into the prop, so it can be called later.
-  T syncProp<T>(StatefulProp<dynamic> Function(BuildContext c, W w) create, [String restoreId]) {
+  T syncProp<T>(StatefulProp<dynamic> Function(BuildContext c, W w) create,
+      [String restoreId]) {
     // Use the builder to create the first instance of the property.
     StatefulProp<dynamic> prop = addProp(create(getContext(), widget));
     // Inject the create builder so we can compare on didUpdateWidget
-    prop.create = create as StatefulProp<dynamic> Function(BuildContext, Widget);
+    prop.create =
+        create as StatefulProp<dynamic> Function(BuildContext, Widget);
     return prop as T;
   }
 
@@ -61,7 +67,8 @@ class StatefulPropsManager<W extends Widget> {
     return prop as T;
   }
 
-  T syncPropKeys<T extends StatefulProp<dynamic>>(Ref<T> ref, T Function(BuildContext c, Widget w) create,
+  T syncPropKeys<T extends StatefulProp<dynamic>>(
+      Ref<T> ref, T Function(BuildContext c, Widget w) create,
       [String restoreId]) {
     // The first time this is called for a given create method, call the method, and cache the result.
     if (_propsByKey.containsKey(ref) == false) {
@@ -75,7 +82,8 @@ class StatefulPropsManager<W extends Widget> {
     return _propsByKey[ref] as T;
   }
 
-  T addPropWithKey<T extends StatefulProp<dynamic>>(Ref<T> key, T prop, [String restoreId]) {
+  T addPropWithKey<T extends StatefulProp<dynamic>>(Ref<T> key, T prop,
+      [String restoreId]) {
     if (_propsByKey.containsKey(key) == false) {
       // Add prop to Map and register with the manager using the same addProp() as the StatefulMixin
       _propsByKey[key] = prop;
@@ -137,6 +145,13 @@ class StatefulPropsManager<W extends Widget> {
       p.isMounted = false;
     });
   }
+
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    // ignore: invalid_use_of_protected_member
+    _values.forEach((prop) => prop.debugFillProperties(properties));
+    // ignore: invalid_use_of_protected_member
+    _propsByKey.values.forEach((prop) => prop.debugFillProperties(properties));
+  }
 }
 
 // Extend this base class to create your own StatefulProperty. Every method is optional, implement only what you need.
@@ -145,7 +160,7 @@ typedef ChildBuilder = Widget Function(BuildContext);
 
 // Base class that all Props extend. It consists of a bunch of optional overrides (init/update/dispose/getBuilder etc),
 // and some of callbacks injected by the PropsManager (addProp, syncProp, setState etc)
-abstract class StatefulProp<T> {
+abstract class StatefulProp<T> with Diagnosticable {
   /// ////////////////////////////////
   /// Life cycle
   // Optional: Create whatever state you need to store, if any (maybe you are only wrapping events, like
@@ -167,7 +182,9 @@ abstract class StatefulProp<T> {
 
   // Optional: Support Restoration; call `register()` with any RestorableValues you have internally.
   @protected
-  void restoreState(void Function(RestorableProperty<Object> property, String restorationId) register) {}
+  void restoreState(
+      void Function(RestorableProperty<Object> property, String restorationId)
+          register) {}
 
   /// ////////////////////////////////
   /// Internal
@@ -195,7 +212,8 @@ abstract class StatefulProp<T> {
 
   // The Add/Sync methods are injected from the manager so props can register sub-props allowing composition
   T Function<T>(StatefulProp<dynamic> prop, [String restoreId]) addProp;
-  T Function<T>(StatefulProp<dynamic> Function(BuildContext c, Widget w) create, [String restoreId]) syncProp;
+  T Function<T>(StatefulProp<dynamic> Function(BuildContext c, Widget w) create,
+      [String restoreId]) syncProp;
 
   /// Restoration
   // Injected when calling [ StatefulPropertyMixin.registerProperty(restoreId: "foo") ]
