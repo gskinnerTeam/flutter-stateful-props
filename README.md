@@ -7,7 +7,7 @@ _We're asking everyone to please try it out, and [log any issues that you find](
 ### 🔨 Installation
 ```yaml
 dependencies:
-  stateful_props: ^0.1.4
+  stateful_props: ^0.1.5+0
 ```
 
 ### ⚙ Import
@@ -90,7 +90,7 @@ This is a minor one in comparison to the others, but it does get pretty annoying
 
 Currently, anytime you want to update the view, you need to wrap your state change in `setState((){}))`, inevitably this begins to hurt readability, and you will either write a `function setFoo(value)`, use a ValueNotifier + Builder, or encapsulate the variable with `get foo` and `set foo` accessors. Either way it costs you a few lines and some wasted typing. No big deal with 1 field, but after 3 or 4, this gets pretty ugly and can begin to overwhelm your more important code. 
 
-`StatefulProps` solves this in a very simple way. There are simple primitive Props, like `IntProp`, `BoolProp`, that act as `ValueNotifier` style objects that **call `setState` when they change**. This is very handy for storing a simple `isLoading` or `currentTab` value. To build the basic `CounterApp` for example, we can just use an `IntProp _counter` and do `_counter.value++`:
+`StatefulProps` solves this in a very simple way. There are simple primitive Props, like `IntProp`, `BoolProp`, that act as `ValueNotifier` style objects that **call `setState` when they change**. Useful for storing a simple `isLoading` or `currentTab` value. To build the basic `CounterApp` for example, we can just use an `IntProp _counter` and do `_counter.value++`:
 ```dart
     IntProp _counter;
     
@@ -106,8 +106,11 @@ Currently, anytime you want to update the view, you need to wrap your state chan
         return FlatButton(child: Text("${_counter.value}"), onPressed: _handleBtnPressed);
     }
 ```
-With just one variable there is not much difference, but add a few more, and this code looks substantially cleaner with `StatefulProps`. Another benefit of using these primitive Props, is that you will get Restoration support essentially for free (coming soon!). If you're not familiar with Restoration API, you [can read up on it here](https://docs.google.com/document/d/1KIiq5CdqnSXxQXbZIDy2Ukc-JHFyLak1JR8e2cm3eO4/edit).
+Notice no `setState` call needed. No valueListenable, no builders, just change the value and it rebuilds.
 
+With just one variable there is not much difference, but add a few more, and this code looks substantially cleaner with `StatefulProps`.
+
+Another benefit of using these primitive Props, is that you will get Restoration support essentially for free (coming soon!). If you're not familiar with Restoration API, you [can read up on it here](https://docs.google.com/document/d/1KIiq5CdqnSXxQXbZIDy2Ukc-JHFyLak1JR8e2cm3eO4/edit).
 
 ## Use Case 4: Having to use Widgets/Builders for non-visual behaviors, leading to nesting hell
 Builders actually do a great job of _encapsulating_ logic and state, the problem with them is _readability_. 4 out of 5 ~~dentists~~ developers agree: nesting sucks when it comes to reading code. It also kinda sucks when writing. No one wants to deal with lining up endless brackets, moving things around is harder than it should be, and your more important content can get lost in a sea of behavioral wrappers.
