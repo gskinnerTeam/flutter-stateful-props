@@ -325,8 +325,8 @@ Counts the number of FocusEvents, and rebuilds the view when that count changes.
 It's very easy to create your own Props. Just extend `StateProperty`, and override any of the optional methods. There are various flavors of Props you can look at for reference:
 * Controller style props like [`AnimProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/animation_prop.dart) and [`TextEditProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/text_edit_prop.dart)
 * Pure callback props like [`GestureProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/gesture_prop.dart) and [`KeyboardProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/keyboard_prop.dart)
-* Combinations of callbacks and state, like the [`MouseRegionProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/mouse_region_prop.dart)
-* Builders that change context like [`LayoutProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/layout_prop.dart) and [`FutureProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/future_prop.dart) 
+* Combinations of callbacks and state, like the [`MouseRegionProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/mouse_region_prop.dart) and [`FutureProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/future_prop.dart)
+* Builders that change context like [`LayoutProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/layout_prop.dart)
 * Pure state encapsulation like [`IntProp`, `BoolProp` and `ValueProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/primitive_props.dart)
 
 The available methods that your custom Prop can override are:
