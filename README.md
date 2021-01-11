@@ -236,7 +236,7 @@ class MyView extends PropsWidget {
 }
 ```
 
-**This is the entire Widget!** No extra 5 lines of boilerplate. As you can see, there is some trade-off here between the increased boilerplate and complexity of `use(...)` and `Ref()` vs. the reduced line count and readability win of a single Class. You can decide which you like best and where. From our experience, `PropsWidget` is really handy for up to 3 props, and at that point a StatefulWidget is probably a better choice.
+**This is the entire Widget!** No extra 5 lines of boilerplate. As you can see, there is some trade-off here between the increased boilerplate and complexity of `use(...)` and `Ref()` vs. the reduced line count and readability win of a single Class.
 
 **WARNING:** If you forget to make your Refs `static` the state will be lost, and the compiler will give no warning here. As such this approach is slightly less robust than the Mixin.
 
