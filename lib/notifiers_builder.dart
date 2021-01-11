@@ -28,6 +28,12 @@ class _NotifiersBuilderState extends State<NotifiersBuilder> {
     super.didUpdateWidget(oldWidget);
   }
 
+  @override
+  void dispose() {
+    widget.notifiers.forEach((element) => element.removeListener(rebuild));
+    super.dispose();
+  }
+
   void addListeners() => widget.notifiers.forEach((element) => element.addListener(rebuild));
 
   void rebuild() => setState(() {});
