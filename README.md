@@ -31,7 +31,7 @@ Generally speaking the built-in props handle common use cases like calling `setS
 To get started, add a `StatefulPropsMixin` to any `StatefulWidget` and then use one of the built-in props. In this case we'll use an `AnimationControllerProp` to manage an `AnimationController` for us:
 ```dart
 class _MyWidgetState extends State<MyWidget> with StatefulPropsMixin {
-  late final _anim = AnimationControllerProp(duration: 1.seconds, autoBuild: true);
+  late final _anim = AnimationControllerProp(this, duration: 1.seconds, autoBuild: true);
 
   @override
   Widget build(BuildContext context) => Opacity(opacity: _anim.controller.value, child: ...)
