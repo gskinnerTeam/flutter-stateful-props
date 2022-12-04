@@ -1,161 +1,87 @@
-import 'package:example/optimized_rebuilds.dart';
+import 'package:example/examples/animations.dart';
+import 'package:example/examples/counter.dart';
+import 'package:example/examples/focus.dart';
+import 'package:example/examples/logic_reuse.dart';
+import 'package:example/examples/future.dart';
+import 'package:example/examples/page_controller.dart';
+import 'package:example/examples/scroll_controller.dart';
+import 'package:example/examples/stream.dart';
+import 'package:example/examples/text_editing.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:provider/provider.dart';
-import 'package:stateful_props/props/future_prop.dart';
 import 'package:stateful_props/stateful_props.dart';
 
-import 'basic_animator.dart';
-import 'basic_builders.dart';
-import 'basic_focus.dart';
-import 'basic_keyboard.dart';
-import 'basic_text_controller.dart';
-import 'scroll_to_top_example.dart';
-import 'sync_props_example.dart';
-
-export 'comparison_stack.dart';
-
 void main() {
-  runApp(MaterialApp(home: Scaffold(body: StatefulPropsDemo())));
+  runApp(App());
+
+  /// TODO:
+  /// PageController
+  /// ScrollController
+  /// Stream
+  /// StreamController
+  /// TabController
+  /// TextEditingController
 }
 
-// Create a list of experiments/tests so we can make a tab-menu from them.
-class Experiment {
-  final String title;
-  final Widget Function() builder;
-  Experiment(this.title, this.builder);
-}
+class App extends StatefulWidget {
+  List<Widget> get children => [
+        const LogicReuseDemo(),
+        const FuturePropDemo(),
+        const ValuePropDemo(),
+        const AnimationsDemo(),
+        const FocusDemo(),
+        const PageControllerDemo(),
+        const ScrollControllerDemo(),
+        const TextEditingDemo(),
+        const StreamDemo(),
+      ];
 
-List<Experiment> widgets = [
-  Experiment("OptimizedBuilders", () => OptimizedRebuildsExample()),
-  Experiment("Builders", () => BasicBuilderExample()),
-  Experiment("Animator", () => BasicAnimatorExample()),
-  Experiment("TextEdit", () => BasicTextControllerExample()),
-  //TODO: DependencySync needs better controls for changing provided data
-  Experiment("DependencySync", () => SyncExample()),
-  Experiment("KeyboardListener", () => BasicKeyboardExample()),
-  Experiment("FocusNode", () => BasicFocusExample()),
-  Experiment("ScrollAndFadeIn", () => ScrollToTopExample()),
-];
-
-// Demo wraps a bunch of tests
-class StatefulPropsDemo extends StatefulWidget {
   @override
-  _StatefulPropsDemoState createState() => _StatefulPropsDemoState();
+  State<App> createState() => _AppState();
 }
 
-class _StatefulPropsDemoState extends State<StatefulPropsDemo> {
-  int _index = 0;
-
+class _AppState extends State<App> with StatefulPropsMixin {
+  late final _tabs = TabControllerProp(this, length: widget.children.length);
   @override
   Widget build(BuildContext context) {
-    // Create a list of btns for each experiment
-    List<Widget> bottomBtns = List.generate(widgets.length, (index) => Expanded(child: _buildBtn(index)));
-    // Provide a ChangeNotifier any of the Examples can use
-    return ChangeNotifierProvider(
-      create: (_) => Deps(),
-      // Provide root restoration scope in case some of the demos want to test it
-      child: RootRestorationScope(
-        restorationId: "statefulDemo",
-        child: Row(
-          children: [
-            /// ///////////////////////////
-            /// Left Menu (Provider Config)
-            ProviderMenu(),
-            Expanded(
-              child: Column(children: [
-                /// ///////////////////////////
-                /// Main Content
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: Duration(milliseconds: 300),
-                    child: widgets[_index].builder.call(),
+    return MaterialApp(
+      scrollBehavior: CustomScrollBehavior(),
+      home: Builder(builder: (context) {
+        return Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                child: TabBarView(
+                  controller: _tabs.controller,
+                  children: widget.children.map((e) => Center(child: e)).toList(),
+                ),
+              ),
+              TabBar(
+                controller: _tabs.controller,
+                tabs: List.generate(
+                  widget.children.length,
+                  (i) => Text(
+                    widget.children[i].toString().replaceFirst('Demo', ''),
+                    style: const TextStyle(color: Colors.black, fontSize: 12),
                   ),
                 ),
-
-                /// ///////////////////////////
-                /// Bottom Menu
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: bottomBtns)
-              ]),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBtn(int index) {
-    return FlatButton(
-      padding: EdgeInsets.symmetric(vertical: 40),
-      onPressed: () => setState(() => _index = index),
-      child: Text(
-        widgets[index].title,
-        style: TextStyle(fontWeight: _index == index ? FontWeight.bold : FontWeight.normal),
-      ),
+              )
+            ],
+          ),
+        );
+      }),
     );
   }
 }
 
-class ProviderMenu extends StatefulWidget {
+class CustomScrollBehavior extends ScrollBehavior {
   @override
-  _ProviderMenuState createState() => _ProviderMenuState();
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.invertedStylus,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.unknown,
+      };
 }
-
-class _ProviderMenuState extends State<ProviderMenu> with TickerProviderStateMixin {
-  @override
-  Widget build(BuildContext context) {
-    Deps deps = Provider.of(context);
-    return Container(
-      padding: EdgeInsets.all(24),
-      color: Colors.grey.shade300,
-      child: Column(
-        children: [
-          Text("Provided Values", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          OutlineButton(
-            child: Text("Toggle: ${deps.toggle}"),
-            onPressed: () => deps.toggle = !deps.toggle,
-          ),
-          OutlineButton(
-            child: Text("Duration: ${deps.seconds}"),
-            onPressed: () {
-              deps.seconds++;
-              if (deps.seconds > 3) deps.seconds = .5;
-            },
-          ),
-          OutlineButton(
-            child: Text("Inject Vsync: ${deps.vsync == null ? "false" : "true"}"),
-            onPressed: () {
-              deps.vsync = deps.vsync == null ? this : null;
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class Deps extends ChangeNotifier {
-  TickerProvider _vsync;
-  double _duration = 1;
-  bool _toggle = false;
-
-  bool get toggle => _toggle;
-  set toggle(bool toggle) {
-    _toggle = toggle;
-    notifyListeners();
-  }
-
-  double get seconds => _duration;
-  set seconds(double duration) {
-    _duration = duration;
-    notifyListeners();
-  }
-
-  TickerProvider get vsync => _vsync;
-  set vsync(TickerProvider vsync) {
-    _vsync = vsync;
-    notifyListeners();
-  }
-}
-
-Deps deps = Deps();
