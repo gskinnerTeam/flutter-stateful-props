@@ -1,3 +1,5 @@
+[![tests](https://github.com/gskinnerTeam/flutter-stateful-props/actions/workflows/tests.yml/badge.svg)](https://github.com/gskinnerTeam/flutter-stateful-props/actions/workflows/tests.yml)
+
 Provides a simple way to re-use behaviors across StatefulWidgets. Improves readability and robustness of your components.
 
 ## 🔨 Installation
