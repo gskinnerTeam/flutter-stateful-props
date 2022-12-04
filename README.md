@@ -63,7 +63,7 @@ class MyCustomProp extends StatefulProp {
 }
 ```
 
-Don't be intimidated by the number of methods, most props don't override many fields. You most common setup is to setup some state when constructed, and use `dispose` to tear it down:
+Don't be intimidated by the number of methods, most props don't override many fields. The most common setup is to setup some state when constructed, and use `dispose` to tear it down:
 ```dart
 class FooControllerProp extends StatefulProp {
   MyCustomProp(StatefulPropsManager manager, {bool autoBuild = false}) : super(manager) {

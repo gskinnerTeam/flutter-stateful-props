@@ -8,9 +8,11 @@ class TabControllerProp extends StatefulProp with SingleTickerStatefulPropMixin 
     required int length,
     bool autoBuild = false,
     VoidCallback? onChange,
+    Duration? animationDuration,
   }) : super(manager) {
     controller = TabController(
       initialIndex: initialIndex,
+      animationDuration: animationDuration,
       length: length,
       vsync: this,
     );
