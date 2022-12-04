@@ -84,7 +84,7 @@ Notice that all the calls to `dispose()` and `setState()` have gone away, as eac
 While a similar level of robustness could also be achieved using a combination of nested `Builder` widgets, it would come at the cost of reduced readability.
 
 ### Flexible & Robust Design
-Because each prop is a proper class, and can nest other props, they fully support inheritence, composition and mixins, allowing you to easily combine or extend existing props to create new ones. For example, if you check the source code, you'll see that a single `ValueProp<T>` is used as the base class for all the primitives (`IntProp`, `BoolProp`, `StringProp` and `DoubleProp`).
+Because each prop is a proper class, and can nest other props, they fully support inheritence, composition and mixins, allowing you to easily combine or extend existing props to create new ones. For example, if you check the source code, you'll see that a single `ValueProp<T>` is used as the base class for all the primitives (`IntProp`, `BoolProp`, `StringProp` and `DoubleProp`). On the other hand props like `PageControllerProp` and `ScrollControllerProp` use a `NotifierListenerProp` demonstrating a composition based approach.
 
 Props can never clash with eachother over field names because they all have their own self-contained scope. This is in contrast to `mixins` which will have issues if two mixins declare the same field name.
 
@@ -147,7 +147,6 @@ class _MyState extends State<MyView> with StatefulPropsMixin {
 }
 ```
 In this way props can act as their own reusable behaviors, shared easily across different widgets without potential bugs that come from mixins or the readability issues that come with nested builders.
-
 
 ## 🐞 Bugs/Requests 
 If you encounter any problems please open an issue. If you feel the library is missing a feature, please raise a ticket on Github and we'll look into it. Pull request are welcome.
