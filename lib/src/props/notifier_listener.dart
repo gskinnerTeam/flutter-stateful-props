@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:reactives/src/stateful_props_manager.dart';
-import 'package:reactives/src/stateful_prop.dart';
+import 'package:stateful_props/src/stateful_props_manager.dart';
+import 'package:stateful_props/src/stateful_prop.dart';
 
 /// Listens to a notifier, rebuilding when it changes, or calling a callback.
 class NotifierListenerProp<T extends ChangeNotifier> extends StatefulProp {

@@ -9,7 +9,7 @@ import 'package:example/examples/stream.dart';
 import 'package:example/examples/text_editing.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:reactives/stateful_props.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 void main() {
   runApp(App());

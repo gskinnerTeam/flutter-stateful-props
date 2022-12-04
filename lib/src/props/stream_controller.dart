@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:reactives/stateful_props.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 /// Creates a [StreamController] which is automatically disposed when necessary.
 class StreamControllerProp<T> extends StatefulProp {

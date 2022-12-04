@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reactives/stateful_props.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 /// Shows how we can abstract the logic and state out of the widget for easier testing and re-use.
 /// In this example we re-use 3 pieces of state, 2 actions and 3 helper methods.

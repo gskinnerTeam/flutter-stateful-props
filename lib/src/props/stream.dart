@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:reactives/stateful_props.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 /// Subscribes to a [Stream] and returns its current state as an [AsyncSnapshot].
 /// * [preserveState] determines if the current value should be preserved when

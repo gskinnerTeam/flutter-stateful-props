@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:reactives/stateful_props.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 typedef ValueChanged<T> = void Function(T? oldValue, T newValue);
 

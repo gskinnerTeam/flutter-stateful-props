@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:reactives/stateful_props.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 /// Port of [SingleTickerProviderStateMixin] on a [StatefulProp]
 mixin SingleTickerStatefulPropMixin on StatefulProp implements TickerProvider {

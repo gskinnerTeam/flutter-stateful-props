@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reactives/stateful_props.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 class AnimationsDemo extends StatefulWidget {
   const AnimationsDemo({Key? key}) : super(key: key);

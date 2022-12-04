@@ -1,8 +1,8 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
-import 'package:reactives/src/props/single_ticker_mixin.dart';
-import 'package:reactives/src/stateful_props_manager.dart';
-import 'package:reactives/src/stateful_prop.dart';
+import 'package:stateful_props/src/props/single_ticker_mixin.dart';
+import 'package:stateful_props/src/stateful_props_manager.dart';
+import 'package:stateful_props/src/stateful_prop.dart';
 
 class AnimationControllerProp extends StatefulProp with SingleTickerStatefulPropMixin implements TickerProvider {
   AnimationControllerProp(

@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:reactives/stateful_props.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 class FuturePropDemo extends StatefulWidget {
   const FuturePropDemo({Key? key}) : super(key: key);

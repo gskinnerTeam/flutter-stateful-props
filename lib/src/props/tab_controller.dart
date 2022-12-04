@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:reactives/stateful_props.dart';
-import 'package:reactives/src/props/single_ticker_mixin.dart';
+import 'package:stateful_props/stateful_props.dart';
+import 'package:stateful_props/src/props/single_ticker_mixin.dart';
 
 class TabControllerProp extends StatefulProp with SingleTickerStatefulPropMixin {
   TabControllerProp(

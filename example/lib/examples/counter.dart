@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reactives/stateful_props.dart';
+import 'package:stateful_props/stateful_props.dart';
 
 /// Shows basic usage of a ValueProp, which simply calls setState anytime its value is changed.
 /// All of the various primitives are supported, [IntProp], [BoolProp], [DoubleProp], [StringProp] etc

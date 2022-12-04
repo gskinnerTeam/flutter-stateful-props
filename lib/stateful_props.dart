@@ -1,4 +1,4 @@
-library reactives;
+library stateful_props;
 
 export 'src/props/props.dart';
 export 'src/stateful_prop.dart';
