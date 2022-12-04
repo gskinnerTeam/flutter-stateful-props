@@ -11,7 +11,7 @@ import 'package:stateful_props/stateful_props.dart';
 ```
 
 ## 🕹️ Basic Usage
-While `StatefulProps` are great for encapsulating your own custom logic and state, the package has built-in support for many common flutter use cases. These include:
+The package includes pre-made props for many common flutter use cases, these include:
 - `AnimationControllerProp`
 - `FocusNodeProp`
 - `FutureProp`
@@ -23,17 +23,18 @@ While `StatefulProps` are great for encapsulating your own custom logic and stat
 - `TabControllerProp`
 - `TextEditingControllerProp`
 
-The built in props handle common use cases like calling `setState` when values change and properly calling `dispose` on any controllers.
+Generally speaking the built in props handle common use cases like calling `setState` when values change and properly calling `dispose` when required.
 
-To get started, add a `StatefulPropsMixin` to any `StatefulWidget` and then use one of the built-in props.
+To get started, add a `StatefulPropsMixin` to any `StatefulWidget` and then use one of the built-in props. In this case we'll use an `AnimationProp` to manage an `AnimationController` for us:
 ```dart
 class _MyWidgetState extends State<MyWidget> with StatefulPropsMixin {
-  late final fadeAnim = AnimationControllerProp(duration: 1.seconds);
+  late final fadeAnim = AnimationControllerProp(duration: 1.seconds, autoBuild: false);
 
   @override
   Widget build(BuildContext context) => FadeTransition(opacity: fadeAnim.controller, child: ...)
 }
 ```
+Notice that `autoBuild` is set to false, if this were true, `setState` would be called automatically each time the animation ticks. Also notice that we don't call `dispose()` on the controller, the prop is handling that for us.
 
 ## 📖 Background & Motivation
 It is difficult to reuse `State` logic in Flutter. We either end up with a complex and deeply nested build method or have to copy-paste the logic across multiple widgets. For a full discussion, see here: https://github.com/flutter/flutter/issues/51752#.
@@ -78,7 +79,7 @@ class _MyWidgetState extends State<MyWidget> with StatefulPropsMixin {
   Widget build(BuildContext context) => ...
 }
 ```
-Notice that all the calls to `dispose()` and `setState()` have gone away, as each `StatefulProp` is responsible for disposing itself and (optionally) calling `setState` when it has changed. This makes the code signficantly less verbose but more importantly, much safer; `dispose` calls can't get missed, and the work of rebuilding when the counter value changes is done automatically.
+Notice that all the calls to `dispose()` and `setState()` have gone away, as each `StatefulProp` is responsible for disposing itself and (optionally) calling `setState` when it has changed. This makes the code easier to read and more robust; `dispose` calls can't get missed, and the work of rebuilding when the counter value changes is done automatically.
 
 While a similar level of robustness could also be achieved using a combination of nested `Builder` widgets, it would come at the cost of reduced readability.
 
