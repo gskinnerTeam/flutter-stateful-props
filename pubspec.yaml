@@ -1,6 +1,6 @@
 name: stateful_props
-description: Easily extract or reuse common behavior and state in Flutter.
-version: 1.0.0
+description: Provides a simple way to re-use behaviors across StatefulWidgets. Improves readability and robustness of your components.
+version: 1.0.0+1
 repository: https://github.com/gskinner/flutter-stateful-props
 
 environment:

@@ -1,432 +1,155 @@
-NOTE: This plugin is in beta. There are missing API and likely some bugs. It will be marked as 1.0 when it's stable. 
-_We're asking everyone to please try it out, and [log any issues that you find](https://github.com/gskinnerTeam/flutter-stateful-props/issues)._
+Provides a simple way to re-use behaviors across StatefulWidgets. Improves readability and robustness of your components.
 
-# stateful_props (beta)
-**A simple and familiar way to re-use behavior and improve readability in your Flutter Widgets:**
-[![](http://screens.gskinner.com/shawn/Photoshop_2020-12-30_01-14-51.png)](http://screens.gskinner.com/shawn/Photoshop_2020-12-30_01-14-51.png)
-### 🔨 Installation
-```yaml
-dependencies:
-  stateful_props: ^0.1.5+0
+## 🔨 Installation
 ```
-
-### ⚙ Import
-
-```dart
+dependencies:
+  stateful_props: ^1.0.0
+```
+## ⚙ Import
+```
 import 'package:stateful_props/stateful_props.dart';
 ```
 
-## 📖 Background
-Flutter has a problem: **there is no great way to re-use stateful behavior across Widgets**. Mixins are useful, but share a common scope, making them limited and prone to name clashes. Builders have encapsulated state, but turn your layout tree into a nested mess, reducing readability and obfuscating your layout code. There is a long discussion on the issue [here](https://github.com/flutter/flutter/issues/51752). 
+## 🕹️ Basic Usage
+While `StatefulProps` are great for encapsulating your own custom logic and state, the package has built-in support for many common flutter use cases. These include:
+- `AnimationControllerProp`
+- `FocusNodeProp`
+- `FutureProp`
+- `IntProp`, `DoubleProp` `StringProp`, `BoolProp`
+- `PageControllerProp`
+- `ScrollControllerProp`
+- `StreamProp`
+- `StreamControllerProp`
+- `TabControllerProp`
+- `TextEditingControllerProp`
 
-This manifests in some common pain-points:
-* Having to `override dispose` for controllers, timers, streams etc
-* Having to `override didChangeDependencies/didUpdateWidget` to sync state with dependencies
-* Having to calling `setState((){})` each time you want to change some state and rebuild (which almost always go together)
-* Having to use Widgets or Builders to encapsulate some non-visual state or behavior, hurting readability
+The built in props handle common use cases like calling `setState` when values change and properly calling `dispose` on any controllers.
 
-`StatefulProps` offers a solution to this: "Props". Small, encapsulated state objects, tied to the lifecycle of the Widget. Each Widget has a list of these "mini states". Props can `init` and `dispose` themselves, they can add Widgets to the tree, and they can sync themselves when dependencies change.
-
-If you'd like to jump right some comparison code, check out the [Basic Animation Example](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/example/lib/basic_animator.dart ) where we show both Classic and `StatefulProps` implementations.
-
-## 💡 Inspiration
-`StatefulProps` is heavily inspired by [hooks](https://youtu.be/dpw9EHDh2bM?t=1092) (and prior art like [DisplayScript](http://displayscript.org/introduction.html)), but it takes a less functional approach, leaning into classic OOP techniques. You can still do everything you could do with `hooks`(functional composition) but other patterns like inheritence, mixins, interfaces and abstract classes are all on the table as well. 
-
-For more on extensibility and custom Props scroll down to **Creating your own Props** section.
-
-## 🕹️ Usage
-Out of the box it comes with [all the standard Props](https://github.com/gskinnerTeam/flutter-stateful-props/tree/master/lib/props) you'll need (`AnimationProp`, `TextEditProp`, `FocusProp`, `FutureProp` etc) but you can declare your own Props extremely easily as well. 
-
-## Use Case 1: Disposing controllers, timers, streams etc
-One of the main sources of runtime errors in Flutter is an `AnimationController`, or `Timer`, that is not disposed properly. Basically anything that needs to be synced to `unmount()` is error prone, because a developer can easily forget about it without any compiler warnings.
-
-With `StatefulProps` this is no longer something you have to think about:
+To get started, add a `StatefulPropsMixin` to any `StatefulWidget` and then use one of the built-in props.
 ```dart
-class _MyViewState extends State with StatefulPropsMixin {
-    TimerProp timer; //This holds a Timer inside
-    AnimationProp anim1; //This holds an AnimationController inside
-    
-    @override
-    initProps(){
-      anim1 = addProp(AnimationProp(.1, autoStart: false)); 
-      timer = addProp(TimerProp(.5, ()=>anim1.controller.forward(), repeat: true)));
-    }
-    
-    @override
-    Widget buildWithProps(BuildContext c){
-        return FadeTransition(opacity: anim1.controller, ...);
-    }
-}
-```
-There are several things to note here:
-* The `Timer` and the `AnimationController` are both cleaned up automatically. We can just "set it and forget it", knowing they are safe.
-* We didn't need to use `TickerProviderMixin`, the StatefulProp has it's own `Ticker`, showing how Props can fully encapsulate their function.
-* The Animation automatically calls `setState` when it's playing, no need to do`addListener(()=>setState((){}))`, or use a `Transition`/`AnimatedBuilder` widget. 
-* `AnimationProp` has syntax sugar like `autoStart`, `autoBuild` and `tweenDouble()` showing how common behaviors can be encapsulated.
-
-Already with this simple example, you can begin to see the benefits. A couple potential bugs have been eliminated, the Widget itself is more readable and maintainable when `dispose` does not exist, and we do not need to introduce builders into our tree.
-
-## Use Case 2: Having to override `didChangeDependencies` and `didUpdateWidget`
-Probably the biggest pain-point in Flutter currently is keeping internal controllers synced with the outside state, either from the Widget or the Context (using `Provider` or `InheritedWidget`). 
-
-For example, if you create something like this inside `initState`: 
-```dart
-anim1 = AnimationController(
-   duration: widget.duration, 
-   vsync: Provider.of<TickerProvider>(context, listen: false))
-```
-This Controller will become out of sync if either of these dependencies change in the future. It's up to you to override `didUpdateWidget` and `didChangeDependencies` and implement the diff-check your self: `if(oldWidget.foo != widget.foo) // blah blah blah`. This is confusing for new devs, annoying for experienced devs, and prone to bugs for all.
-
-`StatefulProps` solves this issue by using a `syncProp()` call when registering your Props:
-```dart
-animProp1 = syncProp((c, w) => AnimationProp(
-    w.duration, 
-    vsync: Provider.of<TickerProvider>(c))); 
-```
-That's all you have to do! The `.duration` and `.vsync` values will always stay in sync with the Widget and Context, no `override` necessary, **no bugs possible**. All you have to do is remember to use `syncProp` instead of `addProp`, the `StatefulProp` will take care of the sync and the diff.
-
-## Use Case 3: Having to call setState all the time
-`StatefulProps` solves this in a very simple way. There are simple primitive Props, like `IntProp`, `BoolProp`, that act as `ValueNotifier` style objects that **call `setState` when they change**. Useful for storing a simple `isLoading` or `currentTab` value. To build the basic `CounterApp` for example, we can just use an `IntProp _counter` and do `_counter.value++`:
-```dart
-    IntProp _counter;
-
-    @override
-    void initProps(){
-        _counter = addProp(IntProp(0));
-    }
-
-    void _handleBtnPressed() => _counter.value++; //setState is handled by Prop
-
-    @override
-    Widget buildWithProps(BuildContext context){
-        return FlatButton(child: Text("${_counter.value}"), onPressed: _handleBtnPressed);
-    }
-```
-Notice no `setState` call needed. No ValueListenables or Builders, no Accessors. Just change the value and it rebuilds. With just one variable there is not much difference, but add a few more, and this code looks substantially cleaner with `StatefulProps`. **Another benefit of using these primitive Props, is that you will get Restoration support (almost) for free**. If you're not familiar with Restoration API, you [can read up on it here](https://docs.google.com/document/d/1KIiq5CdqnSXxQXbZIDy2Ukc-JHFyLak1JR8e2cm3eO4/edit).
-
-## Use Case 4: Having to use Widgets/Builders for non-visual behaviors, leading to nesting hell
-Builders actually do a great job of _encapsulating_ logic and state, the problem with them is _readability_. 4 out of 5 ~~dentists~~ developers agree: nesting sucks when it comes to reading (and writing) code. No one enjoys matching up endless brackets, re-arranging the tree becomes harder than it should be, and your more important content can get lost in a sea of behavioral wrappers.
-
-`StatefulProps` solves this by allowing each Prop to wrap your tree, in additional Widgets. With this we can collapse many common Builders to a 1 or 2 lines and remove all indentation. Widgets like `GestureDetector`, `LayoutBuilder`, `TweenAnimationBuilder`, `MouseRegion`, `RawKeyboardListener` are all essentially replaced by `StatefulProps`.
-
-Imaging some desktop style button which might need the following builders:
-```
-  Widget build(BuildContext _) {
-    print(_isOver.isHovered);
-    return MouseRegion(
-      onExit: (_) => setState(() => _isOver = false),
-      onEnter: (_) => setState(() => _isOver = true),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _someFuture = _loadData()),
-        child: RawKeyboardListener(
-          onKey: _handleKeyPressed,
-          child: LayoutBuilder(builder: (lc, constraints) {
-            print(constraints.size.width);
-            return FutureBuilder<int>(
-                future: _someFuture,
-                builder: (fc, snapshot) {
-                  print(snapshot.hasData);
-                  // Build tree
-                });
-          }),
-        ),
-      ),
-    );
-```
-With `StatefulProps`, this all just goes away:
-```
-    LayoutProp _layout;
-    MouseRegionProp _mouse;
-    FutureProp _futureProp;
-
-    @override
-    void initProps(){
-        _layout = addProp(LayoutProp());
-        _mouse = addProp(MouseRegionProp());
-        _futureProp = addProp(FutureProp(_loadData())
-        addProp(TapProp(() => _futureProp.future = _loadData())));
-        addProp(KeyboardProp(onPressed: _handleKeyPressed)
-    }
-
-    @override
-    Widget buildWithProps(BuildContext context){
-       print(_layout.size.width);
-       print(_mouse.isHovered);
-       print(_futureProp.snapshot.hasData);
-        // Build tree
-    }
-```
-
-Notice how much easier everything is to parse here, finding the unique/custom code is now extremely easy. Removing the nesting allows us to present the display tree clearly and without visual clutter. Our unique code is front and center, and the boilerplate and nesting is just gone!
-
-Another interesting thing to note is that we do not keep a reference to the `TapProp` or the `KeyboardProp`. Since we are only interested in the callbacks we just call `addProp()` and forget about them. `StatefulProps` will handle everything whether you keep a reference or not. We _will_ keep a handle to `layout`, `futureProp` and `mouse` because we want to use those later in our `buildWithProps()` method.
-
-### Optimizing rebuilds
-Use the included `NotifiersBuilder` to rebuild portions of the tree. It simply takes a list of `ChangeNotifiers` and rebuilds when any of them change. All of the primitives are `ChangeNotifiers` and can turn off their default "autoBuild" behavior.
-```dart
-  IntProp _counter;
-  BoolProp _toggle;
+class _MyWidgetState extends State<MyWidget> with StatefulPropsMixin {
+  late final fadeAnim = AnimationControllerProp(duration: 1.seconds);
 
   @override
-  void initProps() {
-    _counter = addProp(IntProp(autoBuild: false));
-    _toggle = addProp(BoolProp(autoBuild: false));
-  }
-
-  @override
-  Widget buildWithProps(BuildContext context) {
-    return RandomColoredBox(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          OutlineButton(onPressed: rebuild, child: Text("setState")),
-          OutlineButton(onPressed: () => _toggle.toggle(), child: Text("bool.toggle()")),
-          OutlineButton(onPressed: () => _counter.increment(), child: Text("int.increment()")),
-          NotifiersBuilder(
-            [_counter, _toggle],
-            builder: (_, __) {
-              String content = "counter: ${_counter.value}, isToggled: ${_toggle.value}";
-              return RandomColoredBox(child: Text(content));
-            },
-          )
-        ],
-      ),);
-  }
-```
-
-## A word about dispose()
-It is quite rare to need `dispose()` within your main `State<T>` as Props (by design) clean up their own state. However, if needed you can override the standard `dispose()` method, and do your thing!
-
-## 👀  PropsWidget
-Sometimes you really just don't want to create 2 classes for a simple Widget with a bit of State. That's where `PropsWidget` comes in. They are single-class variations of `StatefulPropsMixin` that are slightly cludgier to use, but they avoid the readability and line-count hit of having 2 classes.
-
-They do not replace `StatefulWidget`, but they are quite useful for when you want to attach just 1 or 2 pieces of state to an otherwise basic Widget.
-
-Switching from the `StatefulPropsMixin` to the `PropsWidget` is pretty simple:
-* Use `PropsWidget` rather than `State with StatefulPropsMixin`
-* Change `ref = addProp(...)` and `ref = syncProp(...)` to `addProp(ref, ...)` and `syncProp(ref, ...)`
-* Prop declarations change from `IntProp prop1` to `static Ref<IntProp> _prop1 = Ref()`
-* To use a Prop, you call `use(ref)` which can **not** be called from `initProps`
-
-This may seem like a lot, but when viewed side by side, you can see it's not so bad:
-![](http://screens.gskinner.com/shawn/Photoshop_2020-12-30_01-23-03.png)
-
-Other than those changes most everything else is identical. Both versions use the same Props under the hood, and the Widget overrides are identical:
-```dart
-class MyView extends PropsWidget {
-    static final Ref<TimerProp> _timer = Ref(); //This holds a Timer inside
-    static final Ref<AnimationProp> _anim1 = Ref(); //This holds an AnimationController inside
-
-    AnimationProp get anim1Prop => use(_anim1); // Setup a one-line getter to wrap the `use()` call
-
-    @override
-    initProps(){
-      addProp(_anim1, AnimationProp(.1, autoStart: false));
-      // The use() call in the closure is fine, cause it's not called right now
-      final anim = addProp(_timer, TimerProp(.5, ()=>anim1Prop.controller.forward(), repeat: true)));
-      // If we need to use a prop here, we can just use the instance returned from add/sync
-      anim.controller.forward();
-    }
-
-    @override
-    Widget buildWithProps(BuildContext c){
-        return FadeTransition(opacity: anim1Prop.controller, ...);
-    }
+  Widget build(BuildContext context) => FadeTransition(opacity: fadeAnim.controller, child: ...)
 }
 ```
 
-**This is the entire Widget!** No extra 5 lines of boilerplate. As you can see, there is some trade-off here between the increased boilerplate and complexity of `use(...)` and `Ref()` vs. the reduced line count and readability win of a single Class.
+## 📖 Background & Motivation
+It is difficult to reuse `State` logic in Flutter. We either end up with a complex and deeply nested build method or have to copy-paste the logic across multiple widgets. For a full discussion, see here: https://github.com/flutter/flutter/issues/51752#.
 
-**WARNING:** If you forget to make your Refs `static` the state will be lost, and the compiler will give no warning here. As such this approach is slightly less robust than the Mixin.
-
-## EXAMPLES
-Below are some samples showing some different use cases that can be done with the core Props.
-
-In all cases assume these code examples are inside of a `State with StatefulPropsMixin`. Everything here can be done in a `PropsWidget` as well, but we'll show the mixin versions as the code reads a little cleaner.
-
-### Simple Timer
-A Timer call that is automatically disposed, making it context-safe.
+For example, have you ever written code like this?
 ```dart
-  TimerProp timer;
-  IntProp intProp;
+class _MyWidgetState extends State<MyWidget> with TickerProviderStateMixin {
+  late TextEditingController textController = TextEditingController();
+  late AnimationController fadeInAnim = AnimationController(vsync: this, duration: Duration(seconds: 1));
+  late AnimationController scaleAnim = AnimationController(vsync: this, duration: Duration(seconds: 1));
+  late FocusNode focusNode = FocusNode(descendantsAreFocusable: false);
+
+  int _count = 0;
+  int get count => _count;
+  set count(int count) => setState(() => _count = count);
+
   @override
-  void initProps() {
-    intProp = addProp(IntProp());
-    timer = addProp(TimerProp(.5, (_) => intProp.value++, periodic: true));
+  void dispose() {
+    fadeInAnim.dispose();
+    scaleAnim.dispose();
+    textController.dispose();
+    focusNode.dispose();
+    super.dispose();
   }
 
   @override
-  Widget buildWithProps(BuildContext context) 
-      => Text("Ticks: ${intProp.value}");
+  Widget build(BuildContext context) => ...
 ```
 
-### Simple TextEditingController
-TextEditingController that is automatically disposed.
+Not only is this code overly verbose, but it's also error-prone. If any of the `dipose()` calls are missed, you will have a bug. If the `setState` calls is missed, the view will not appear to update. It would be much nicer if each type of object could handle it's own `dispose()` call, or automatically rebuild the state when changed.
+
+With `StatefulProps` this can be written as:
 ```dart
-  TextEditProp textEdit1;
+class _MyWidgetState extends State<MyWidget> with StatefulPropsMixin {
+  late final textController = TextEditingControllerProp(this);
+  late final fadeInAnim = AnimationControllerProp(duration: Duration(seconds: 1));
+  late final scaleAnim = AnimationControllerProp(duration: Duration(seconds: 1));
+  late final focusNode = FocusNodeProp(this, descendantsAreFocusable: false);
+  late final counter = IntProp(this);
 
   @override
-  void initProps() {
-    textEdit1 = addProp(TextEditProp(onChanged: (prop) => print(prop.text)));
-  }
-
-  @override
-  Widget buildWithProps(BuildContext context) 
-      => TextField(controller: textEdit1.controller);
-```
-
-### FutureProp and TapProp
-Loads a future initally, and reloads it on tap.
-```dart
-  FutureProp<String> future;
-
-  @override
-  void initProps() {
-    // Load a future when the widget is first mounted
-    future = addProp(FutureProp(initial: _loadData()));
-    // Refresh when the widget is tapped
-    addProp(TapProp(() => future.value = _loadData()));
-  }
-
-  Future<String> _loadData() => Future.delayed(Duration(seconds: 1), () => "result");
-
-  @override
-  Widget buildWithProps(BuildContext context) 
-      => Text("${future.snapshot.hasData}");
-```
-
-### FocusProp and IntProp
-Counts the number of FocusEvents, and rebuilds the view when that count changes.
-```dart
-  FocusProp focus1;
-  IntProp focusCount;
-
-  @override
-  void initProps() {
-    focus1 = addProp(FocusProp(
-      onChanged: (_) => focusCount.increment()));
-    focusCount = addProp(IntProp());
-  }
-
-  @override
-  Widget buildWithProps(BuildContext context) {
-    return Column(
-      children: [
-        TextField(focusNode: focus1.node), 
-        TextField(), 
-        Text("FocusEvent Count: $focusCount")
-      ],
-    );
-  }
-```
-
-## Creating your own Props
-It's very easy to create your own Props. Just extend `StateProperty`, and override any of the optional methods. There are various flavors of Props you can look at for reference:
-* Controller style props like [`AnimProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/animation_prop.dart) and [`TextEditProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/text_edit_prop.dart)
-* Pure callback props like [`GestureProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/gesture_prop.dart) and [`KeyboardProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/keyboard_prop.dart)
-* Combinations of callbacks and state, like the [`MouseRegionProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/mouse_region_prop.dart) and [`FutureProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/future_prop.dart)
-* Builders that change context like [`LayoutProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/layout_prop.dart)
-* Pure state encapsulation like [`IntProp`, `BoolProp` and `ValueProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/primitive_props.dart)
-
-The available methods that your custom Prop can override are:
-* `init()`
-* `update(Prop latest)`
-* `dispose()`
-* `getBuilder(Widget Function(BuildContext) childBuilder)`
-* `restoreState(registerFn)`
-
-**You can override all or none of these**. Many props override `init`, `update` and `dispose`, but some override none at all. This is perfectly valid for Props that do not need any lifecycle hooks and just encapsulate some state + some logic. Going forward it may become best practice for all Props to implement `restoreState` whenever they can, but there will always be things like `MouseRegionProp` where restoration just doesn't make sense.
-
-
-### A note on composition and inheritance (and interfaces and mixins...)
-Because `StatefulProps` are classes, and not functions, they benefit from all of the code re-use strategies available in Dart. Inheritence, composition, inrerfaces and mixins are all available as options when putting together your own `StatefulProps`. 
-
-While there's many advanced things you can do with this extensibility, even the primitive examples are quite interesting. For example, if you look at the existing `IntProp` class:
-```dart
-class IntProp extends ValueProp<int> {
-  IntProp([int defaultValue = 0]) : super(defaultValue);
+  Widget build(BuildContext context) => ...
 }
 ```
-You can see that it simply extends a more basic `ValueProp<T>`:
-```dart
-class ValueProp<T> extends StatefulProp<ValueProp<T>> {
-  ValueProp(this._value, {this.onChange});
-  T _value;
-  void Function(T value) onChange;
+Notice that all the calls to `dispose()` and `setState()` have gone away, as each `StatefulProp` is responsible for disposing itself and (optionally) calling `setState` when it has changed. This makes the code signficantly less verbose but more importantly, much safer; `dispose` calls can't get missed, and the work of rebuilding when the counter value changes is done automatically.
 
-  T get value => _value;
-  set value(T value) {
-    if (value == _value) return;
-    setState(() {
-      _value = value;
-      onChange?.call(_value);
-    });
-  }
-}
-```
-This is the entire code for both these Props! They have no lifecycle hooks at all, except that they call `setState()` when their value changes.
+While a similar level of robustness could also be achieved using a combination of nested `Builder` widgets, it would come at the cost of reduced readability.
 
-All of the various primitives in the library are implemented on this generic `ValueProp` and the same Prop could be used as a " ValueNotifier" style object for your own types:
- ```dart
- ValueProp<MyThing> myThing;
- initProps(){
-     myThing = addProp(ValueProp(MyThing()));
-     print(myThing.value);
- }
- ...
- myThing.value = myThing.value; // This will not rebuild
- myThing.value = MyThing(); // This will rebuild
- ```
- If (when) you get sick of writing out the generic, you can just define your own `ThingProp` by extending `ValueProp` yourself:
- ```dart
- class ThingProp extends ValueProp<ThingProp> {
-  ThingProp([ThingProp defaultValue = null]) : super(defaultValue);
-}
-```
-And then use it:
-```dart
- ThingProp myThing;
- initProps(){
-     myThing = addProp(ThingProp(Thing()));
- }
-```
-Another example of inheritance is our shortcut handler for Taps. Since taps are by far the most common gesture, we created a dedicated `TapProp(VoidCallback)` to reduce boilerplate as low as possible. It extends `GestureProp` and just passes it a `onTap: ` value:
-```dart
-class TapProp extends GestureProp {
-  TapProp(VoidCallback onTap) : super(onTap: onTap);
-}
-```
-We could just as easily have used composition here, but inheritence is more succinct in this case.
+### Flexible & Robust Design
+Because each prop is a proper class, and can nest other props, they fully support inheritence, composition and mixins, allowing you to easily combine or extend existing props to create new ones. For example, if you check the source code, you'll see that a single `ValueProp<T>` is used as the base class for all the primitives (`IntProp`, `BoolProp`, `StringProp` and `DoubleProp`).
 
-For an example of composition, you can look at the [`FutureProp`](https://github.com/gskinnerTeam/flutter-stateful-props/blob/master/lib/props/future_prop.dart), which internally uses a `ValueProp` to track it's future:
+Props can never clash with eachother over field names because they all have their own self-contained scope. This is in contrast to `mixins` which will have issues if two mixins declare the same field name.
+
+## 🕹️ Advanced Usage
+### Creating New Props
+To create a new prop extend the `StatefulProp` class, and override any of the optional methods:
 ```dart
+class MyCustomProp extends StatefulProp {
+  MyCustomProp(StatefulPropsManager manager) : super(manager);
+
   @override
-  void init() {
-    // Use a ValueProp to handle our 'did-change' check
-    futureValue = addProp?.call(ValueProp(initialFuture));
-  }
+  void didChangeDependencies() {}
+
+  @override
+  void dispose() {}
+
+  @override
+  void didUpdateWidget(covariant StatefulWidget oldWidget) {}
+
+  @override
+  void activate() {}
+
+  @override
+  void deactivate() {}
+}
 ```
-As you can see composition is very easy, it has one rule: 
-* **any Prop can `add`/`sync` any other Prop, as long as they do it in `init()`!** 
 
-We're still scratching the surface of what can be done here, and excited to see what people come up with.
+#### Rebuilding
+If a prop would like to rebuild the state it is attached to it can call `manager.scheduleBuild()` which in turn will call `setState()`.
+
+### Re-using Stateful Logic
+You can use custom props to encapsulate any combination of logic and state that you would like. Either for use across multiple widgets or to isolate for easier testing. For example you could extract common login-related behavior to a `LoginBehaviorProp`:
+```dart
+class LoginBehaviorProp extends StatefulProp {
+  LoginBehaviorProp(StatefulPropsManager manager) : super(manager);
+  late final _emailText = TextEditingControllerProp(manager);
+  late final _passwordText = TextEditingControllerProp(manager);
+  late final _showPassword = BoolProp(manager); // rebuilds when changed
+
+  TextEditingController get emailCtrl => _emailText.controller;
+  TextEditingController get passwordCtrl => _passwordText.controller;
+  bool get showPassword => _showPassword.value;
+
+  void submit() => print('login logic goes here');
+
+  void toggleShowPassword() => _showPassword.value = !showPassword;
+}
+```
+This forms a sort of "micro state" that holds both stateful fields as well as shared logic to work on those fields. It also resembles what is commonly referred to as a `ViewModel` or `ViewController`. The fully encapsulated behavior could then be used inside of any `StatefulWidget`:
+```dart
+class _MyState extends State<MyView> with StatefulPropsMixin {
+  late final _login = LoginBehaviorProp(this);
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+    TextFormField(controller, _login.emailCtrl),
+    TextFormField(controller, _login.passwordCtrl, obscureText: _login.showPassword),
+    Button(onPressed: _login.submit),
+  ]);
+}
+```
+In this way props can act as their own reusable behaviors, shared easily across different widgets without potential bugs that come from mixins or the readability issues that come with nested builders.
 
 
-## Syntactic Sugar
-The core set of props provide some opinionated syntactic sugar where we think it's useful. They have a focus on pragmatism and brevity, over strict 1:1 adherence to the underlying Flutter API. For example: `onChange` events will contain the payload you would expect rather than the empty ones Flutter often provides; `AnimationProps` take a `double` over `Duration`; etc.  
+## 🐞 Bugs/Requests 
+If you encounter any problems please open an issue. If you feel the library is missing a feature, please raise a ticket on Github and we'll look into it. Pull request are welcome.
 
-**It is important to note that the opinionated nature of the core Props is seperate from the underlying system. A set of Props with strict-adherence would be very easy to create if someone were so inclined.** The average size of a Prop in the lib now is around 40 lines, and that's with the syntactic sugar.
-
-
-## 📝 Contributing
- We are actively seeking support setting up some integrated testing and are welcoming all contributions and Pull Requests from the community. We would like `StatefulProps` to become a standard flutter library, and that can only be done with community support.
-
-
-## 🐞 Bugs/Requests
-
-If you encounter any problems please open an issue. If you feel the library is missing a feature, please create an issue on Github. 
-
-## 📃 License
-
+## 📃 License 
 MIT License
