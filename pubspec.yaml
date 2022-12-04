@@ -1,7 +1,8 @@
 name: stateful_props
 description: Provides a simple way to re-use behaviors across StatefulWidgets. Improves readability and robustness of your components.
-version: 1.0.0+3
-repository: https://github.com/gskinner/flutter-stateful-props
+version: 1.0.0+4
+repository: https://github.com/gskinnerTeam/flutter-stateful-props
+issues: https://github.com/gskinnerTeam/flutter-stateful-props/issues
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
