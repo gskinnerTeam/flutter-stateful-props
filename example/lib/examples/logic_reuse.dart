@@ -16,7 +16,7 @@ class LoginLogic extends StatefulProp {
   bool get showPassword => _showPassword.value;
 
   // Actions
-  void submit() => print('login logic goes here, call manager.scheduleBuild to rebuild the widget');
+  void submit() => debugPrint('login logic goes here, call manager.scheduleBuild to rebuild the widget');
   void toggleShowPassword() => _showPassword.value = !showPassword;
 }
 

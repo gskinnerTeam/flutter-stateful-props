@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stateful_props/stateful_props.dart';
 
-import 'single_ticker_mixin.dart';
-
 /// Creates and disposes a [TextEditingController].
 class TextEditingControllerProp extends StatefulProp with SingleTickerStatefulPropMixin {
   TextEditingControllerProp(

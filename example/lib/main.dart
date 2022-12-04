@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:stateful_props/stateful_props.dart';
 
 void main() {
-  runApp(App());
+  runApp(const App());
 
   /// TODO:
   /// PageController
@@ -24,6 +24,8 @@ void main() {
 }
 
 class App extends StatefulWidget {
+  const App({Key? key}) : super(key: key);
+
   List<Widget> get children => [
         const LogicReuseDemo(),
         const FuturePropDemo(),

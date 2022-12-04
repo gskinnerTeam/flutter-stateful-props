@@ -10,9 +10,9 @@ class FocusDemo extends StatefulWidget {
 
 class _FocusDemoState extends State<FocusDemo> with StatefulPropsMixin {
   late final FocusNodeProp focus1 = FocusNodeProp(this)
-    ..addListener(() => print('focus1 changed, hasFocus = ${focus1.node.hasFocus}'));
+    ..addListener(() => debugPrint('focus1 changed, hasFocus = ${focus1.node.hasFocus}'));
   late final FocusNodeProp focus2 = FocusNodeProp(this)
-    ..addListener(() => print('focus2 changed, hasFocus = ${focus2.node.hasFocus}'));
+    ..addListener(() => debugPrint('focus2 changed, hasFocus = ${focus2.node.hasFocus}'));
 
   @override
   Widget build(BuildContext context) {
