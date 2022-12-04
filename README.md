@@ -17,7 +17,7 @@ The package includes pre-made props for many common flutter use cases, these inc
 - `AnimationControllerProp`
 - `FocusNodeProp`
 - `FutureProp`
-- `IntProp`, `DoubleProp` `StringProp`, `BoolProp`
+- `IntProp`, `DoubleProp`, `StringProp`, `BoolProp`
 - `PageControllerProp`
 - `ScrollControllerProp`
 - `StreamProp`
@@ -25,9 +25,9 @@ The package includes pre-made props for many common flutter use cases, these inc
 - `TabControllerProp`
 - `TextEditingControllerProp`
 
-Generally speaking the built in props handle common use cases like calling `setState` when values change and properly calling `dispose` when required.
+Generally speaking the built-in props handle common use cases like calling `setState` when values change and/or calling `dispose` when required.
 
-To get started, add a `StatefulPropsMixin` to any `StatefulWidget` and then use one of the built-in props. In this case we'll use an `AnimationProp` to manage an `AnimationController` for us:
+To get started, add a `StatefulPropsMixin` to any `StatefulWidget` and then use one of the built-in props. In this case we'll use an `AnimationControllerProp` to manage an `AnimationController` for us:
 ```dart
 class _MyWidgetState extends State<MyWidget> with StatefulPropsMixin {
   late final fadeAnim = AnimationControllerProp(duration: 1.seconds, autoBuild: false);
@@ -152,6 +152,3 @@ In this way props can act as their own reusable behaviors, shared easily across 
 
 ## 🐞 Bugs/Requests 
 If you encounter any problems please open an issue. If you feel the library is missing a feature, please raise a ticket on Github and we'll look into it. Pull request are welcome.
-
-## 📃 License 
-MIT License
