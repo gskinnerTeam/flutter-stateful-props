@@ -3,8 +3,8 @@ import 'package:stateful_props/stateful_props.dart';
 
 /// Shows how we can abstract the logic and state out of the widget for easier testing and re-use.
 /// In this example we re-use 3 pieces of state, 2 actions and 3 helper methods.
-class LoginLogic extends StatefulProp {
-  LoginLogic(StatefulPropsManager manager) : super(manager);
+class LoginLogicProp extends StatefulProp {
+  LoginLogicProp(StatefulPropsManager manager) : super(manager);
   // Some state / props
   late final _emailText = TextEditingControllerProp(manager);
   late final _passwordText = TextEditingControllerProp(manager);
@@ -16,11 +16,12 @@ class LoginLogic extends StatefulProp {
   bool get showPassword => _showPassword.value;
 
   // Actions
-  void submit() => debugPrint('login logic goes here, call manager.scheduleBuild to rebuild the widget');
+  void submit() => debugPrint('login logic goes here, talk to services, moderls, etc. '
+      'Call manager.scheduleBuild to rebuild the widget');
   void toggleShowPassword() => _showPassword.value = !showPassword;
 }
 
-/// Use the [LoginLogic] inside any [StatefulWidget] using the [StatefulPropsMixin]
+/// Use the [LoginLogicProp] inside any [StatefulWidget] using the [StatefulPropsMixin]
 class LogicReuseDemo extends StatefulWidget {
   const LogicReuseDemo({Key? key}) : super(key: key);
 
@@ -30,7 +31,7 @@ class LogicReuseDemo extends StatefulWidget {
 
 class _LogicReuseDemoState extends State<LogicReuseDemo> with StatefulPropsMixin {
   /// Here is the re-usable logic logic and state
-  late final _loginLogic = LoginLogic(this);
+  late final _loginLogic = LoginLogicProp(this);
 
   @override
   Widget build(BuildContext context) {
