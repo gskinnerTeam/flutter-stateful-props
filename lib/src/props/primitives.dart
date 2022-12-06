@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:stateful_props/stateful_props.dart';
 
-typedef ValueChanged<T> = void Function(T? oldValue, T newValue);
+typedef PropChanged<T> = void Function(T? oldValue, T newValue);
 
 class DoubleProp extends ValueProp<double> {
   DoubleProp(
     StatefulPropsManager manager, {
     double initial = 0,
-    ValueChanged<double>? onChange,
+    PropChanged<double>? onChange,
     bool autoBuild = true,
   }) : super(manager, initial: initial, onChange: onChange, autoBuild: autoBuild);
 }
@@ -16,7 +16,7 @@ class IntProp extends ValueProp<int> {
   IntProp(
     StatefulPropsManager manager, {
     int initial = 0,
-    ValueChanged<int>? onChange,
+    PropChanged<int>? onChange,
     bool autoBuild = true,
   }) : super(manager, initial: initial, onChange: onChange, autoBuild: autoBuild);
 }
@@ -25,7 +25,7 @@ class BoolProp extends ValueProp<bool> {
   BoolProp(
     StatefulPropsManager manager, {
     bool initial = false,
-    ValueChanged<bool>? onChange,
+    PropChanged<bool>? onChange,
     bool autoBuild = true,
   }) : super(manager, initial: initial, onChange: onChange, autoBuild: autoBuild);
 }
@@ -34,7 +34,7 @@ class StringProp extends ValueProp<String> {
   StringProp(
     StatefulPropsManager manager, {
     String initial = '',
-    ValueChanged<String>? onChange,
+    PropChanged<String>? onChange,
     bool autoBuild = true,
   }) : super(manager, initial: initial, onChange: onChange, autoBuild: autoBuild);
 }
@@ -47,7 +47,7 @@ class ValueProp<T> extends StatefulProp with ChangeNotifier {
   final T initial;
   late T _value;
   late T? _prev;
-  final ValueChanged<T>? onChange;
+  final PropChanged<T>? onChange;
   final bool autoBuild;
 
   T get value => _value;

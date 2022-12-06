@@ -20,4 +20,6 @@ class TabControllerProp extends StatefulProp with SingleTickerStatefulPropMixin 
   }
   late final TabController controller;
   late final NotifierListenerProp listener;
+
+  int get index => controller.index;
 }

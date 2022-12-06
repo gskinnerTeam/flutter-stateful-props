@@ -4,7 +4,7 @@ import 'package:stateful_props/stateful_props.dart';
 /// Creates and disposes a [ScrollController].
 class ScrollControllerProp extends StatefulProp {
   ScrollControllerProp(
-    StatefulPropsManager manager, {
+    StatefulPropsMixin manager, {
     double initialScrollOffset = 0,
     bool keepScrollOffset = true,
     bool autoBuild = false,
@@ -16,6 +16,10 @@ class ScrollControllerProp extends StatefulProp {
     );
     listener = NotifierListenerProp(manager, controller, autoBuild: autoBuild, onChange: onChange);
   }
+
   late final ScrollController controller;
   late final NotifierListenerProp listener;
+
+  ScrollPosition? get position => controller.hasClients ? controller.position : null;
+  double get px => position?.pixels ?? 0;
 }

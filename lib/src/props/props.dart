@@ -10,3 +10,4 @@ export 'stream.dart';
 export 'stream_controller.dart';
 export 'tab_controller.dart';
 export 'text_editing_controller.dart';
+export 'transformation_controller_prop.dart';

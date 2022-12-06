@@ -32,6 +32,8 @@ class AnimationControllerProp extends StatefulProp with SingleTickerStatefulProp
   final bool autoBuild;
   late final AnimationController controller;
 
+  double get value => controller.value;
+
   @override
   void dispose() {
     controller.dispose();

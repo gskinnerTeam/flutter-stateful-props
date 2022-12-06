@@ -20,4 +20,6 @@ class PageControllerProp extends StatefulProp {
   }
   late final PageController controller;
   late final NotifierListenerProp listener;
+
+  double get page => controller.hasClients ? controller.page! : 0;
 }

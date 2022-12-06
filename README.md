@@ -5,7 +5,7 @@ Provides a simple way to re-use behaviors across StatefulWidgets. Improves reada
 ## 🔨 Installation
 ```
 dependencies:
-  stateful_props: ^1.0.0
+  stateful_props: ^1.2.0
 ```
 ## ⚙ Import
 ```
@@ -63,13 +63,13 @@ class MyCustomProp extends StatefulProp {
 }
 ```
 
-Don't be intimidated by the number of methods, most props don't override many fields. The most common setup is to setup some state when constructed, and use `dispose` to tear it down:
+Don't be intimidated by the number of methods, most props don't override many fields. The most common configuration is to setup some state when constructed, and use `dispose` to tear it down:
 ```dart
 class FooControllerProp extends StatefulProp {
   MyCustomProp(StatefulPropsManager manager, {bool autoBuild = false}) : super(manager) {
       // setup
       controller =  = FooController();
-      if(autoBuild) controller.addListener(manager.scheduleRebuild)
+      if(autoBuild) controller.addListener(manager.scheduleBuild)
   }
   late final FooController controller;
 
@@ -96,12 +96,12 @@ class LoginBehaviorProp extends StatefulProp {
   TextEditingController get passwordCtrl => _passwordText.controller;
   bool get showPassword => _showPassword.value;
 
-  void submit() => print('login logic goes here');
+  void submit() => print('login logic goes here, talk to services models etc.');
 
   void toggleShowPassword() => _showPassword.value = !showPassword;
 }
 ```
-This small prop contains 2 controllers, 1 piece of state, 3 helper methods and 2 actions, forming a sort of "micro state" that holds both stateful fields as well as shared logic to work on those fields. It also resembles what is commonly referred to as a `ViewModel` or `ViewController`.
+This small prop contains 2 controllers, 1 piece of state, 3 helper methods and 2 actions, forming a sort of "micro state" that holds both stateful fields as well as actions which might work on those fields. It also resembles what is commonly referred to as a `ViewModel` or `ViewController`.
 
 This fully encapsulated behavior could then be used inside of any `StatefulWidget`:
 ```dart
@@ -118,10 +118,39 @@ class _MyState extends State<MyView> with StatefulPropsMixin {
 ```
 In this way props can act as their own reusable behaviors, shared easily across different widgets without potential bugs that come from mixins or the readability issues that come with nested builders.
 
-### Flexible & Robust Design
-Because each prop is a proper class, and can nest other props, they fully support inheritence, composition and mixins, allowing you to easily use or extend existing props to create new ones. For example, in the source code you'll see that a single `ValueProp<T>` is used as the base class for all the primitives (`IntProp`, `BoolProp`, `StringProp` and `DoubleProp`) in classic OOP style. Meanwhile props like `PageControllerProp` and `ScrollControllerProp` use a `NotifierListenerProp`, which demonstrates a composition based approach.
+They also work great as general view controllers, letting you easily separate logic from the view for improved readability.
 
-Props can never clash with eachother over field names because they all have their own self-contained scope. This is in contrast to `mixins` which will have issues if two mixins declare the same field name.
+### Flexible & Robust Design
+Because each prop is a class, and can nest other props, they fully support inheritence, composition and mixins, allowing you to easily use or extend existing props to create new ones.
+
+For example, in the source code you'll see that a single `ValueProp<T>` is used as the base class for all the primitives (`IntProp`, `BoolProp`, `StringProp` and `DoubleProp`) in classic OOP style:
+```dart
+// Extend an existing prop
+class DoubleProp extends ValueProp<double> {
+  DoubleProp(
+    StatefulPropsManager manager, {
+    double initial = 0,
+    ValueChanged<double>? onChange,
+    bool autoBuild = true,
+  }) : super(manager, initial: initial, onChange: onChange, autoBuild: autoBuild);
+}
+```
+
+Meanwhile props like `PageControllerProp` and `ScrollControllerProp` use a `NotifierListenerProp`, which demonstrates a composition based approach:
+```dart
+class PageControllerProp extends StatefulProp {
+  PageControllerProp(StatefulPropsManager manager, {bool autoBuild = false, VoidCallback? onChange, ...})
+  : super(manager) {
+    controller = PageController( ... );
+    // Compose an existing prop, `NotifierListenerProp` can handle the onChange, autoBuild and dispose behavior
+    listener = NotifierListenerProp(manager, controller, autoBuild: autoBuild, onChange: onChange);
+  }
+  late final PageController controller;
+  late final NotifierListenerProp listener;
+}
+```
+
+Props can never clash over field or method names because they all have their own self-contained scope. As a result you can stack as many as you need in a single view without concerns. This is in contrast to `mixins` which will have issues/clashes in this situation.
 
 ## 📖 Background & Motivation
 It is difficult to reuse `State` logic in Flutter. We either end up with a complex and deeply nested build method or have to copy-paste the logic across multiple widgets. For a full discussion, see here: https://github.com/flutter/flutter/issues/51752#.
