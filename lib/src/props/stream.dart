@@ -33,7 +33,7 @@ class StreamProp<T> extends StatefulProp {
   StreamSubscription<T>? _subscription;
 
   AsyncSnapshot<T> _snapshot = const AsyncSnapshot.waiting();
-  AsyncSnapshot get snapshot => _snapshot;
+  AsyncSnapshot<T> get snapshot => _snapshot;
 
   @protected
   final void Function(AsyncSnapshot<T>)? onChange;
